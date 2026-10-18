@@ -10,7 +10,7 @@ Chesse is a public-repository web chess application with a Node.js/Express backe
 - PostgreSQL access uses the `pg` connection pool and the runtime-only `DATABASE_URL` environment variable.
 - Passwords are hashed with bcryptjs before insertion and are never returned by API responses.
 - A signed HTTP-only JWT cookie named `chesse_session` provides the application session. `COOKIE_SECURE=true` and `SameSite=None` support the HTTPS embedded preview and Render deployment; local HTTP development can set `COOKIE_SECURE=false`.
-- The frontend uses pinned CDN builds of chess.js and chessboard.js. chess.js owns legal move validation, checkmate detection, and draw detection; chessboard.js owns board rendering and drag-and-drop interaction.
+- The frontend uses a pinned CDN build of chess.js for rules and a local accessible board renderer with copied piece assets. Players select a source square and a target square, which avoids a fragile external drag-and-drop dependency.
 - A completed local game submits exactly one authenticated result to `POST /api/games/result`. The backend updates the logged-in player's row in `player_stats` inside a transaction.
 - Render receives `render.yaml`, a production start script, a health route, and an optional Dockerfile. Secrets are configured in Render rather than committed to Git.
 
@@ -25,6 +25,7 @@ Chesse is a public-repository web chess application with a Node.js/Express backe
 - `public/index.html`: authentication shell and post-login dashboard markup.
 - `public/app.js`: API client, auth state, matchmaking polling, synchronized board lifecycle, navigation sections, and game actions.
 - `public/styles.css`: responsive visual system for the chess dashboard.
+- `public/assets/chesspieces/wikipedia/`: local board piece images sourced from the supplied reference board.
 - `public/manus-routes.json`: route manifest for the managed preview.
 - `render.yaml`: Render Blueprint for a Node web service and runtime environment variables.
 - `Dockerfile`: portable production container definition.

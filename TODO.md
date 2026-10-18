@@ -21,7 +21,7 @@
 
 ## 4. Provide a proven-library chess game
 
-- [x] The dashboard renders a playable chess board with chessboard.js.
+- [x] The dashboard renders a visible, accessible board with local piece assets and click-to-move interaction.
 - [x] chess.js validates moves and owns the game state.
 - [x] Checkmate, stalemate, threefold repetition, insufficient material, and the fifty-move rule are handled as draw or win/loss terminal states.
 - [x] A new-game action resets the board and result state.

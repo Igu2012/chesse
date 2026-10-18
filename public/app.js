@@ -31,6 +31,9 @@ const elements = {
   sectionCopy: document.querySelector('#section-copy'),
   sectionContent: document.querySelector('#section-content'),
   playPage: document.querySelector('.play-page'),
+  playEyebrow: document.querySelector('#play-eyebrow'),
+  playTitle: document.querySelector('#play-title'),
+  gameActions: document.querySelector('#game-actions'),
   logoutButton: document.querySelector('#logout-button'),
   newGameButton: document.querySelector('#new-game-button'),
   newGameFromPanel: document.querySelector('#new-game-from-panel'),
@@ -42,13 +45,18 @@ const elements = {
 };
 
 let authMode = 'login';
-let board = null;
+let boardElement = document.querySelector('#board');
 let game = null;
 let currentGameId = null;
 let currentGameState = null;
 let movePending = false;
 let matchmakingTimer = null;
 let gamePollingTimer = null;
+let boardOrientation = 'white';
+let selectedSquare = null;
+let legalTargets = [];
+
+const pieceAssets = '/assets/chesspieces/wikipedia';
 
 const sectionData = {
   problems: {
@@ -132,6 +140,78 @@ function setClockDisplay(seconds, element) {
   element.textContent = `${minutes}:${remainder}`;
 }
 
+function renderBoard() {
+  if (!boardElement || !game) return;
+  const files = boardOrientation === 'white' ? ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] : ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'];
+  const ranks = boardOrientation === 'white' ? [8, 7, 6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6, 7, 8];
+  boardElement.innerHTML = '';
+  boardElement.setAttribute('aria-label', 'Chess board');
+
+  ranks.forEach((rank, rankIndex) => {
+    files.forEach((file, fileIndex) => {
+      const square = `${file}${rank}`;
+      const piece = game.get(square);
+      const isLight = (file.charCodeAt(0) - 97 + rank) % 2 === 0;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `board-square ${isLight ? 'square-light' : 'square-dark'}`;
+      button.dataset.square = square;
+      button.setAttribute('aria-label', square);
+      if (square === selectedSquare) button.classList.add('square-selected');
+      if (legalTargets.includes(square)) button.classList.add('square-legal');
+      if (fileIndex === 0) {
+        const rankLabel = document.createElement('span');
+        rankLabel.className = 'board-rank-label';
+        rankLabel.textContent = rank;
+        button.appendChild(rankLabel);
+      }
+      if (rankIndex === 7) {
+        const fileLabel = document.createElement('span');
+        fileLabel.className = 'board-file-label';
+        fileLabel.textContent = file;
+        button.appendChild(fileLabel);
+      }
+      if (piece) {
+        const image = document.createElement('img');
+        image.className = 'board-piece';
+        image.src = `${pieceAssets}/${piece.color}${piece.type.toUpperCase()}.png`;
+        image.alt = `${piece.color === 'w' ? 'White' : 'Black'} ${piece.type}`;
+        button.appendChild(image);
+      }
+      button.addEventListener('click', () => handleSquareClick(square));
+      boardElement.appendChild(button);
+    });
+  });
+}
+
+function canPlaySquare(square) {
+  if (!currentGameState || currentGameState.status !== 'active' || movePending) return false;
+  const turnColor = game.turn() === 'w' ? 'white' : 'black';
+  if (turnColor !== currentGameState.playerColor) return false;
+  const piece = game.get(square);
+  return Boolean(piece && piece.color === game.turn());
+}
+
+function handleSquareClick(square) {
+  if (!currentGameState || currentGameState.status !== 'active' || movePending) return;
+  if (selectedSquare && legalTargets.includes(square)) {
+    const from = selectedSquare;
+    selectedSquare = null;
+    legalTargets = [];
+    renderBoard();
+    submitMove(from, square);
+    return;
+  }
+  if (canPlaySquare(square)) {
+    selectedSquare = square;
+    legalTargets = game.moves({ square, verbose: true }).map((move) => move.to);
+  } else {
+    selectedSquare = null;
+    legalTargets = [];
+  }
+  renderBoard();
+}
+
 function updateBoardStatus() {
   if (!currentGameState || !game) {
     elements.gameStatus.textContent = 'Entre na fila para jogar';
@@ -157,28 +237,22 @@ function setIdleBoard() {
   currentGameId = null;
   currentGameState = null;
   movePending = false;
+  boardOrientation = 'white';
+  selectedSquare = null;
+  legalTargets = [];
   game = new Chess();
-  if (board) {
-    board.position(game.fen());
-    board.orientation('white');
-  } else {
-    board = Chessboard('board', {
-      draggable: true,
-      position: game.fen(),
-      orientation: 'white',
-      pieceTheme: 'https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/img/chesspieces/wikipedia/{piece}.png',
-      onDragStart,
-      onDrop,
-      onSnapEnd,
-    });
-  }
+  renderBoard();
   formatMoves([]);
   setClockDisplay(600, elements.playerClock);
   setClockDisplay(600, elements.opponentClock);
   elements.playerClock.classList.add('active');
   elements.opponentClock.classList.remove('active');
+  elements.gameActions.classList.add('is-hidden');
+  elements.playEyebrow.textContent = 'JOGAR / ENCONTRE UM ADVERSÁRIO';
+  elements.playTitle.textContent = 'Jogar contra alguém';
   updateBoardStatus();
   setQueueStatus('Você ainda não está na fila.');
+  setPanel('new-game');
 }
 
 function showDashboard(payload) {
@@ -238,23 +312,6 @@ async function submitAuth(event) {
   }
 }
 
-function onDragStart(source, piece) {
-  if (!currentGameState || currentGameState.status !== 'active' || movePending) return false;
-  const expectedColor = game.turn() === 'w' ? 'white' : 'black';
-  if (expectedColor !== currentGameState.playerColor) return false;
-  return !((game.turn() === 'w' && piece.search(/^b/) !== -1) || (game.turn() === 'b' && piece.search(/^w/) !== -1));
-}
-
-function onDrop(source, target) {
-  if (!currentGameId || movePending) return 'snapback';
-  submitMove(source, target);
-  return 'snapback';
-}
-
-function onSnapEnd() {
-  if (currentGameState) board.position(currentGameState.fen);
-}
-
 async function submitMove(from, to) {
   movePending = true;
   try {
@@ -274,11 +331,16 @@ function applyGameState(gameState) {
   currentGameState = gameState;
   currentGameId = gameState.id;
   game = new Chess(gameState.fen);
-  board.position(gameState.fen, false);
-  board.orientation(gameState.playerColor);
+  boardOrientation = gameState.playerColor;
+  selectedSquare = null;
+  legalTargets = [];
+  renderBoard();
   formatMoves(gameState.moves || []);
   updateBoardStatus();
   setQueueStatus('Partida encontrada.', false);
+  elements.gameActions.classList.remove('is-hidden');
+  elements.playEyebrow.textContent = 'PARTIDA AO VIVO';
+  elements.playTitle.textContent = 'Partida em andamento';
   if (gameState.status === 'finished') stopGamePolling();
 }
 
@@ -410,8 +472,8 @@ async function logout() {
   } finally {
     stopMatchmakingPolling();
     stopGamePolling();
-    if (board) board.destroy();
-    board = null;
+    boardElement.innerHTML = '';
+    boardElement = document.querySelector('#board');
     game = null;
     currentGameId = null;
     currentGameState = null;
@@ -439,6 +501,9 @@ elements.newGameFromPanel.addEventListener('click', joinMatchmaking);
 elements.leaveQueueButton.addEventListener('click', leaveMatchmaking);
 elements.drawButton.addEventListener('click', () => finishGame('draw'));
 elements.resignButton.addEventListener('click', () => finishGame('resign'));
-elements.flipBoardButton.addEventListener('click', () => board && board.flip());
+elements.flipBoardButton.addEventListener('click', () => {
+  boardOrientation = boardOrientation === 'white' ? 'black' : 'white';
+  renderBoard();
+});
 elements.mobileMenuButton.addEventListener('click', () => elements.sidebar.classList.toggle('open'));
 bootstrap();

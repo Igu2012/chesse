@@ -1,6 +1,6 @@
 # Chesse
 
-Chesse is a compact web chess dashboard inspired by modern online chess platforms. It combines a Node.js/Express API, a static HTML/CSS/JavaScript interface, Neon PostgreSQL, bcrypt password hashing, chess.js move validation, and chessboard.js board rendering.
+Chesse is a compact web chess dashboard inspired by modern online chess platforms. It combines a Node.js/Express API, a static HTML/CSS/JavaScript interface, Neon PostgreSQL, bcrypt password hashing, chess.js move validation, and a local accessible board renderer.
 
 ## Features
 
@@ -8,7 +8,7 @@ Chesse is a compact web chess dashboard inspired by modern online chess platform
 - Bcrypt password hashing with no plaintext password storage.
 - HTTP-only signed JWT session cookie.
 - Legal move validation and game state from chess.js.
-- Drag-and-drop board rendering from chessboard.js.
+- A local board renderer with stable piece assets and click-to-move interaction.
 - Persistent matchmaking that keeps a player in the queue until another authenticated player joins.
 - Server-authoritative games with polling synchronization between both browsers.
 - Server-side move validation, turn ownership, resign, draw, and automatic game completion.

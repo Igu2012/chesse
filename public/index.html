@@ -11,7 +11,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard-1.0.0.min.css">
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
@@ -23,7 +22,7 @@
           <h1>Play the position in front of you.</h1>
           <p class="intro-copy">A clean board, a clear record, and no noise between you and the next move.</p>
           <div class="intro-rule"></div>
-          <p class="intro-note">Your games are tracked against your player profile in Neon PostgreSQL.</p>
+          <p class="intro-note">Seu histórico e seu rating acompanham cada partida.</p>
         </div>
 
         <div class="auth-card panel">
@@ -73,14 +72,14 @@
           <div class="main-shell">
             <header class="topbar">
               <button class="mobile-menu-button" type="button" id="mobile-menu-button" aria-label="Open navigation">☰</button>
-              <div class="topbar-title"><span class="live-dot"></span><span>PARTIDA AO VIVO</span></div>
+              <div class="topbar-title"><span class="live-dot"></span><span>CHESSE</span></div>
               <div class="topbar-account"><span id="topbar-username">PLAYER</span><div class="mini-avatar" id="topbar-avatar">P</div></div>
             </header>
 
             <main class="play-page">
               <div class="play-header">
-                <div><p class="eyebrow">JOGAR / PARTIDA CASUAL</p><h1>Partida de xadrez</h1></div>
-                <div class="match-meta"><span class="match-dot"></span><span>10 min</span><span>•</span><span>Clássico</span></div>
+                <div><p class="eyebrow" id="play-eyebrow">JOGAR / ENCONTRE UM ADVERSÁRIO</p><h1 id="play-title">Jogar contra alguém</h1></div>
+                <div class="match-meta"><span class="match-dot"></span><span>10 min</span><span>•</span><span>Partida clássica</span></div>
               </div>
 
               <section class="play-layout">
@@ -97,33 +96,27 @@
                   <div class="board-controls">
                     <button class="control-button" type="button" id="flip-board-button">⇅ <span>Virar tabuleiro</span></button>
                     <span class="board-status"><span class="live-dot"></span><span id="game-status">Brancas jogam</span></span>
-                    <button class="control-button" type="button" id="sound-button">◖ <span>Som</span></button>
                   </div>
                 </div>
 
                 <aside class="game-panel">
                   <div class="panel-tabs" role="tablist" aria-label="Game panel">
-                    <button class="panel-tab active" type="button" data-panel="match" role="tab">Partida</button>
-                    <button class="panel-tab" type="button" data-panel="new-game" role="tab">Nova partida</button>
-                    <button class="panel-tab" type="button" data-panel="chat" role="tab">Chat</button>
+                    <button class="panel-tab" type="button" data-panel="match" role="tab">Partida</button>
+                    <button class="panel-tab active" type="button" data-panel="new-game" role="tab">Jogar</button>
                   </div>
-                  <div class="panel-view active" id="match-panel">
+                  <div class="panel-view" id="match-panel">
                     <div class="panel-heading"><div><p class="eyebrow">HISTÓRICO DE LANCES</p><h2>Partida atual</h2></div><span class="panel-round" id="move-count">0</span></div>
                     <div class="move-list" id="move-list"><p class="empty-state">Faça seu primeiro lance para começar.</p></div>
                     <div class="panel-status"><span class="live-dot"></span><span id="panel-status-text">Aguardando as brancas</span></div>
                   </div>
-                  <div class="panel-view" id="new-game-panel">
+                  <div class="panel-view active" id="new-game-panel">
                     <div class="panel-heading"><div><p class="eyebrow">CONTROLES</p><h2>Nova partida</h2></div></div>
                     <p class="panel-copy">Fique na fila até encontrar outro jogador real. Assim que houver match, a partida começa automaticamente.</p>
                     <p class="queue-status" id="queue-status">Você ainda não está na fila.</p>
                     <button class="button button-primary button-full" type="button" id="new-game-from-panel">Encontrar adversário <span>→</span></button>
                     <button class="button button-secondary button-full queue-leave-button is-hidden" type="button" id="leave-queue-button">Sair da fila</button>
                   </div>
-                  <div class="panel-view" id="chat-panel">
-                    <div class="panel-heading"><div><p class="eyebrow">MENSAGENS</p><h2>Chat da partida</h2></div></div>
-                    <p class="empty-state chat-empty">O chat fica disponível quando você jogar com outra pessoa.</p>
-                  </div>
-                  <div class="game-actions"><button class="button button-primary" type="button" id="new-game-button">Encontrar adversário <span>→</span></button><div class="action-row"><button class="button button-secondary" type="button" id="draw-button">Empate</button><button class="button button-secondary danger-button" type="button" id="resign-button">Desistir</button></div></div>
+                  <div class="game-actions is-hidden" id="game-actions"><button class="button button-primary" type="button" id="new-game-button">Encontrar adversário <span>→</span></button><div class="action-row"><button class="button button-secondary" type="button" id="draw-button">Empate</button><button class="button button-secondary danger-button" type="button" id="resign-button">Desistir</button></div></div>
                 </aside>
               </section>
             </main>
@@ -137,9 +130,7 @@
       </section>
     </main>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard-1.0.0.min.js"></script>
     <script src="/app.js" defer></script>
   </body>
 </html>
