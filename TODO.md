@@ -60,36 +60,36 @@
 
 ## 10. Deliver local practice and tactical problems
 
-- [ ] Problems provide browser-local chess positions with legal move checking, hints, solution feedback, and local progress persistence.
-- [ ] Practice against the rat runs chess.js and the deterministic opponent in the player's browser without sending practice moves or AI computation to the backend.
-- [ ] Practice clearly separates local training from server-authoritative multiplayer games.
+- [x] Problems provide browser-local chess positions with legal move checking, hints, solution feedback, and local progress persistence.
+- [x] Practice against the rat runs chess.js and the deterministic opponent in the player's browser without sending practice moves or AI computation to the backend.
+- [x] Practice clearly separates local training from server-authoritative multiplayer games.
 
 ## 11. Deliver public watching
 
-- [ ] Assistir lists active public games with both player names, color assignment, move count, and current status.
-- [ ] A spectator can open an active game in read-only mode, see the board and move history, and receive updates through polling.
-- [ ] Spectators cannot submit moves, resign, offer a draw, or modify the game.
+- [x] Assistir lists active public games with both player names, color assignment, move count, and current status.
+- [x] A spectator can open an active game in read-only mode, see the board and move history, and receive updates through polling.
+- [x] Spectators cannot submit moves, resign, offer a draw, or modify the game.
 
 ## 12. Deliver editable player profiles
 
-- [ ] Users can set a display name and bio in addition to their immutable username.
-- [ ] Profile data is persisted in Neon without changing the existing `users` or `player_stats` tables.
-- [ ] The profile screen displays the player's rating, statistics, completed-game history, and current rat character.
+- [x] Users can set a display name and bio in addition to their immutable username.
+- [x] Profile data is persisted in Neon without changing the existing `users` or `player_stats` tables.
+- [x] The profile screen displays the player's rating, statistics, completed-game history, and current rat character.
 
 ## 13. Deliver rat character customization
 
-- [ ] The profile includes an original chubby, round-bellied rat mascot with a recognizable visual style.
-- [ ] Users can customize rat color, accessory, and whether the rat appears as the profile avatar, full character, or both.
-- [ ] The customization is visible in the player's profile and compact account avatar.
+- [x] The profile includes an original chubby, round-bellied rat mascot with a recognizable visual style.
+- [x] Users can customize rat color, accessory, and whether the rat appears as the profile avatar, full character, or both.
+- [x] The customization is visible in the player's profile and compact account avatar.
 
 ## 14. Deliver completed-game history
 
-- [ ] Authenticated users can browse completed multiplayer games with opponent, color, result, move count, and completion time.
-- [ ] Selecting a history item shows its final board state and saved move list in read-only mode.
+- [x] Authenticated users can browse completed multiplayer games with opponent, color, result, move count, and completion time.
+- [x] Selecting a history item shows its final board state and saved move list in read-only mode.
 
 ## 15. Deliver automatic interface translation
 
-- [ ] The interface detects the browser language automatically on first load.
-- [ ] Portuguese, English, Spanish, French, and German translations cover authentication, navigation, play, practice, profile, watching, history, and game-state messages.
-- [ ] Users can override the detected language and the preference persists locally.
-- [ ] Missing translations fall back to English without breaking the interface.
+- [x] The interface detects the browser language automatically on first load.
+- [x] Portuguese, English, Spanish, French, and German translations cover authentication, navigation, play, practice, profile, watching, history, and game-state messages.
+- [x] Users can override the detected language and the preference persists locally.
+- [x] Missing translations fall back to English without breaking the interface.

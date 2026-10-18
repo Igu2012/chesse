@@ -63,6 +63,7 @@ let practiceSelectedSquare = null;
 let practiceLegalTargets = [];
 let practiceMode = 'puzzle';
 let currentLocale = 'en';
+let practiceProgress = Number(localStorage.getItem('chesse-practice-solved') || 0);
 
 const pieceAssets = '/assets/chesspieces/wikipedia';
 const ratAssets = {
@@ -770,7 +771,7 @@ const practicePuzzle = { fen: '4k3/8/8/8/8/8/4R3/6K1 w - - 0 1', from: 'e2', to:
 
 function practiceMarkup() {
   const board = practiceGame ? boardMarkup(practiceGame, 'white', true) : '';
-  return `<div class="practice-layout"><div class="feature-card practice-card"><div class="practice-tabs"><button class="button ${practiceMode === 'puzzle' ? 'button-primary' : 'button-secondary'}" data-practice-mode="puzzle">${t('solvePuzzle')}</button><button class="button ${practiceMode === 'bot' ? 'button-primary' : 'button-secondary'}" data-practice-mode="bot">${t('localBot')}</button></div><p class="panel-copy">${t('practiceCopy')}</p><div class="practice-board mini-board">${board}</div><p id="practice-status" class="panel-status">${practiceMode === 'bot' ? t('practiceTurn') : 'Find the winning move.'}</p><div class="practice-actions"><button class="button button-secondary" id="practice-hint">${t('showHint')}</button><button class="button button-primary" id="practice-reset">Reset</button></div></div><div class="feature-card practice-info"><img class="rat-full" src="${ratAssets.full}" alt="Chesse rat character"><h2>${t('problemsSoon')}</h2><p>${t('practiceCopy')}</p></div></div>`;
+  return `<div class="practice-layout"><div class="feature-card practice-card"><div class="practice-tabs"><button class="button ${practiceMode === 'puzzle' ? 'button-primary' : 'button-secondary'}" data-practice-mode="puzzle">${t('solvePuzzle')}</button><button class="button ${practiceMode === 'bot' ? 'button-primary' : 'button-secondary'}" data-practice-mode="bot">${t('localBot')}</button></div><p class="panel-copy">${t('practiceCopy')}</p><div class="practice-board mini-board">${board}</div><p id="practice-status" class="panel-status">${practiceMode === 'bot' ? t('practiceTurn') : 'Find the winning move.'}</p><div class="practice-actions"><button class="button button-secondary" id="practice-hint">${t('showHint')}</button><button class="button button-primary" id="practice-reset">Reset</button></div></div><div class="feature-card practice-info"><img class="rat-full" src="${ratAssets.full}" alt="Chesse rat character"><h2>${t('problemsSoon')}</h2><p>${t('practiceCopy')}</p><p class="practice-score">Solved locally: ${practiceProgress}</p></div></div>`;
 }
 
 function renderProblemsSection() {
@@ -805,10 +806,10 @@ function handlePracticeSquare(square) {
     practiceLegalTargets = [];
     if (move && practiceMode === 'puzzle') {
       const status = document.querySelector('#practice-status');
-      if (from === practicePuzzle.from && square === practicePuzzle.to) { if (status) status.textContent = 'Excellent. Puzzle solved.'; } else if (status) status.textContent = 'Legal move, but try to find the forcing check.';
+      if (from === practicePuzzle.from && square === practicePuzzle.to) { practiceProgress += 1; localStorage.setItem('chesse-practice-solved', String(practiceProgress)); if (status) status.textContent = 'Excellent. Puzzle solved.'; } else if (status) status.textContent = 'Legal move, but try to find the forcing check.';
     }
     if (move && practiceMode === 'bot') window.setTimeout(makeLocalRatMove, 280);
-    elements.sectionContent.querySelector('.practice-board').innerHTML = boardMarkup(practiceGame);
+    elements.sectionContent.querySelector('.practice-board').innerHTML = boardMarkup(practiceGame, 'white', true);
     bindPracticeActions();
     return;
   }
