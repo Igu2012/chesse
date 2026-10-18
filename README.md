@@ -9,6 +9,9 @@ Chesse is a compact web chess dashboard inspired by modern online chess platform
 - HTTP-only signed JWT session cookie.
 - Legal move validation and game state from chess.js.
 - Drag-and-drop board rendering from chessboard.js.
+- Persistent matchmaking that keeps a player in the queue until another authenticated player joins.
+- Server-authoritative games with polling synchronization between both browsers.
+- Server-side move validation, turn ownership, resign, draw, and automatic game completion.
 - Automatic win, loss, and draw persistence after a completed game.
 - Dashboard with the current board, profile, rating, and recorded statistics.
 - Render Blueprint and production Dockerfile.
@@ -21,7 +24,9 @@ The application expects these existing PostgreSQL tables:
 - `users (id, username, password_hash, created_at)`
 - `player_stats (user_id, wins, losses, draws, current_rating)`
 
-The server does not run migrations or alter these tables. It creates a zeroed `player_stats` row for a newly registered user when one does not already exist.
+The server does not alter these existing tables. It creates a zeroed `player_stats` row for a newly registered user when one does not already exist.
+
+On the first matchmaking or game request, the server idempotently creates these additional application tables if they do not exist: `matchmaking_queue`, `chess_games`, and `chess_game_moves`. The Neon role used by `DATABASE_URL` must be allowed to create tables in the selected database.
 
 ## Local setup
 
@@ -95,6 +100,12 @@ Do not paste credentials into `render.yaml`, source files, README files, or Git 
 - `POST /api/auth/logout` — clear the session cookie.
 - `GET /api/stats` — return the authenticated user's statistics.
 - `POST /api/games/result` — record one authenticated `win`, `loss`, or `draw`.
+- `POST /api/matchmaking/join` — enter the authenticated player into the persistent queue or return an immediate match.
+- `GET /api/matchmaking/status` — return `idle`, `waiting`, or `matched` state.
+- `POST /api/matchmaking/leave` — leave the matchmaking queue.
+- `GET /api/multiplayer/games/:gameId` — return the current server-authoritative game state and move list.
+- `POST /api/multiplayer/games/:gameId/moves` — validate and submit one legal move for the authenticated player.
+- `POST /api/multiplayer/games/:gameId/finish` — resign or record a draw for a participating player.
 
 ## Security notes
 

@@ -21,8 +21,9 @@ Chesse is a public-repository web chess application with a Node.js/Express backe
 - `src/middleware/auth.js`: JWT cookie authentication middleware.
 - `src/routes/auth.js`: signup, login, session lookup, and logout routes.
 - `src/routes/stats.js`: authenticated statistics read and game-result update routes.
+- `src/routes/multiplayer.js`: persistent queue, match creation, game polling, server-side move validation, resign, draw, and result settlement.
 - `public/index.html`: authentication shell and post-login dashboard markup.
-- `public/app.js`: API client, auth state, board lifecycle, and game result handling.
+- `public/app.js`: API client, auth state, matchmaking polling, synchronized board lifecycle, navigation sections, and game actions.
 - `public/styles.css`: responsive visual system for the chess dashboard.
 - `public/manus-routes.json`: route manifest for the managed preview.
 - `render.yaml`: Render Blueprint for a Node web service and runtime environment variables.
@@ -54,4 +55,4 @@ Chesse is a public-repository web chess application with a Node.js/Express backe
 
 ## Required behavior
 
-The implementation preserves the requested username/password-only sign-in, bcrypt hashing, proven chess libraries, Neon-backed statistics updates after checkmate or draw, dashboard profile and stats, English-only repository documentation/comments, and a public GitHub repository without committed environment files.
+The implementation preserves the requested username/password-only sign-in, bcrypt hashing, proven chess libraries, Neon-backed statistics updates after checkmate or draw, dashboard profile and stats, persistent real-player matchmaking, server-authoritative move validation, English-only repository documentation/comments, and a public GitHub repository without committed environment files.

@@ -54,11 +54,11 @@
           <aside class="global-sidebar">
             <div class="sidebar-brand"><img src="/pawn-logo.png" alt="Chesse pawn" class="sidebar-logo"><span>CHESSE</span></div>
             <nav class="global-nav" aria-label="Main navigation">
-              <button class="nav-item active" type="button"><span class="nav-icon">♟</span><span>Jogar</span></button>
-              <button class="nav-item" type="button"><span class="nav-icon">♞</span><span>Problemas</span></button>
-              <button class="nav-item" type="button"><span class="nav-icon">♜</span><span>Aprender</span></button>
-              <button class="nav-item" type="button"><span class="nav-icon">◉</span><span>Assistir</span></button>
-              <button class="nav-item" type="button"><span class="nav-icon">♙</span><span>Comunidade</span></button>
+              <button class="nav-item active" type="button" data-section="play"><span class="nav-icon">♟</span><span>Jogar</span></button>
+              <button class="nav-item" type="button" data-section="problems"><span class="nav-icon">♞</span><span>Problemas</span></button>
+              <button class="nav-item" type="button" data-section="learn"><span class="nav-icon">♜</span><span>Aprender</span></button>
+              <button class="nav-item" type="button" data-section="watch"><span class="nav-icon">◉</span><span>Assistir</span></button>
+              <button class="nav-item" type="button" data-section="community"><span class="nav-icon">♙</span><span>Comunidade</span></button>
             </nav>
             <div class="sidebar-footer">
               <div class="sidebar-account">
@@ -114,20 +114,26 @@
                   </div>
                   <div class="panel-view" id="new-game-panel">
                     <div class="panel-heading"><div><p class="eyebrow">CONTROLES</p><h2>Nova partida</h2></div></div>
-                    <p class="panel-copy">Comece uma nova partida casual com relógio de 10 minutos.</p>
-                    <button class="button button-primary button-full" type="button" id="new-game-from-panel">Começar nova partida <span>→</span></button>
+                    <p class="panel-copy">Fique na fila até encontrar outro jogador real. Assim que houver match, a partida começa automaticamente.</p>
+                    <p class="queue-status" id="queue-status">Você ainda não está na fila.</p>
+                    <button class="button button-primary button-full" type="button" id="new-game-from-panel">Encontrar adversário <span>→</span></button>
+                    <button class="button button-secondary button-full queue-leave-button is-hidden" type="button" id="leave-queue-button">Sair da fila</button>
                   </div>
                   <div class="panel-view" id="chat-panel">
                     <div class="panel-heading"><div><p class="eyebrow">MENSAGENS</p><h2>Chat da partida</h2></div></div>
                     <p class="empty-state chat-empty">O chat fica disponível quando você jogar com outra pessoa.</p>
                   </div>
-                  <div class="game-actions"><button class="button button-primary" type="button" id="new-game-button">Jogar novamente <span>→</span></button><div class="action-row"><button class="button button-secondary" type="button" id="draw-button">Empate</button><button class="button button-secondary danger-button" type="button" id="resign-button">Desistir</button></div></div>
+                  <div class="game-actions"><button class="button button-primary" type="button" id="new-game-button">Encontrar adversário <span>→</span></button><div class="action-row"><button class="button button-secondary" type="button" id="draw-button">Empate</button><button class="button button-secondary danger-button" type="button" id="resign-button">Desistir</button></div></div>
                 </aside>
               </section>
             </main>
+            <section class="section-view is-hidden" id="section-view">
+              <div class="section-view-header"><p class="eyebrow" id="section-eyebrow">CHESSE</p><h1 id="section-title">Seção</h1><p id="section-copy">Conteúdo da seção.</p></div>
+              <div class="section-content" id="section-content"></div>
+            </section>
           </div>
         </div>
-        <nav class="bottom-nav" aria-label="Mobile navigation"><button class="active" type="button">♟<span>Jogar</span></button><button type="button">♞<span>Problemas</span></button><button type="button">♜<span>Aprender</span></button><button type="button">♙<span>Perfil</span></button></nav>
+        <nav class="bottom-nav" aria-label="Mobile navigation"><button class="active" type="button" data-section="play">♟<span>Jogar</span></button><button type="button" data-section="problems">♞<span>Problemas</span></button><button type="button" data-section="learn">♜<span>Aprender</span></button><button type="button" data-section="community">♙<span>Perfil</span></button></nav>
       </section>
     </main>
 

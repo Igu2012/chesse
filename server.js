@@ -17,6 +17,7 @@ const helmet = require('helmet');
 const db = require('./src/db');
 const authRoutes = require('./src/routes/auth');
 const statsRoutes = require('./src/routes/stats');
+const multiplayerRoutes = require('./src/routes/multiplayer');
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
@@ -49,6 +50,8 @@ app.get('/api/health', (request, response) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/matchmaking', multiplayerRoutes);
+app.use('/api/multiplayer', multiplayerRoutes);
 
 app.use(express.static(publicDirectory, { extensions: ['html'] }));
 

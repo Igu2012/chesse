@@ -23,6 +23,14 @@ const elements = {
   opponentClock: document.querySelector('#opponent-clock'),
   moveList: document.querySelector('#move-list'),
   moveCount: document.querySelector('#move-count'),
+  queueStatus: document.querySelector('#queue-status'),
+  leaveQueueButton: document.querySelector('#leave-queue-button'),
+  sectionView: document.querySelector('#section-view'),
+  sectionEyebrow: document.querySelector('#section-eyebrow'),
+  sectionTitle: document.querySelector('#section-title'),
+  sectionCopy: document.querySelector('#section-copy'),
+  sectionContent: document.querySelector('#section-content'),
+  playPage: document.querySelector('.play-page'),
   logoutButton: document.querySelector('#logout-button'),
   newGameButton: document.querySelector('#new-game-button'),
   newGameFromPanel: document.querySelector('#new-game-from-panel'),
@@ -36,26 +44,47 @@ const elements = {
 let authMode = 'login';
 let board = null;
 let game = null;
-let terminalSubmitted = false;
-let playerSeconds = 600;
-let opponentSeconds = 600;
-let clockInterval = null;
+let currentGameId = null;
+let currentGameState = null;
+let movePending = false;
+let matchmakingTimer = null;
+let gamePollingTimer = null;
+
+const sectionData = {
+  problems: {
+    eyebrow: 'TREINO DIÁRIO',
+    title: 'Problemas',
+    copy: 'Pratique posições selecionadas e transforme seus padrões em decisões rápidas.',
+    content: '<div class="feature-card"><span class="feature-icon">♞</span><h2>Problemas em breve</h2><p>O próximo módulo vai trazer posições táticas com solução passo a passo e acompanhamento de progresso.</p><button class="button button-primary" type="button" data-section="play">Voltar para jogar <span>→</span></button></div>',
+  },
+  learn: {
+    eyebrow: 'CENTRO DE APRENDIZADO',
+    title: 'Aprender',
+    copy: 'Construa uma base melhor com princípios que você pode aplicar na próxima partida.',
+    content: '<div class="learning-grid"><div class="feature-card"><span class="feature-kicker">01 / ABERTURA</span><h2>Controle o centro</h2><p>Comece disputando as casas centrais e desenvolva suas peças menores antes de mover a mesma peça várias vezes.</p></div><div class="feature-card"><span class="feature-kicker">02 / SEGURANÇA</span><h2>Faça o roque</h2><p>Coloque o rei em segurança e conecte as torres antes de iniciar um ataque no centro.</p></div></div>',
+  },
+  watch: {
+    eyebrow: 'PARTIDAS AO VIVO',
+    title: 'Assistir',
+    copy: 'Acompanhe o espaço onde as partidas públicas poderão aparecer quando houver espectadores.',
+    content: '<div class="feature-card"><span class="feature-icon">◉</span><h2>Nenhuma partida pública agora</h2><p>Quando a comunidade estiver jogando, as partidas em andamento poderão ser acompanhadas aqui.</p><button class="button button-primary" type="button" data-section="play">Encontrar uma partida <span>→</span></button></div>',
+  },
+  community: {
+    eyebrow: 'SUA COMUNIDADE',
+    title: 'Comunidade',
+    copy: 'Seu perfil, seu rating e o histórico que você constrói a cada partida.',
+    content: '<div class="feature-card"><span class="feature-icon">♙</span><h2>Perfil do jogador</h2><p>Use o matchmaking para criar seu histórico real contra outros jogadores. Suas estatísticas são atualizadas pelo servidor ao final da partida.</p><button class="button button-primary" type="button" data-section="play">Jogar agora <span>→</span></button></div>',
+  },
+};
 
 async function api(path, options = {}) {
   const response = await fetch(path, {
     credentials: 'same-origin',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
+    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
     ...options,
   });
   const payload = response.status === 204 ? null : await response.json();
-
-  if (!response.ok) {
-    throw new Error(payload?.error || 'The request could not be completed.');
-  }
-
+  if (!response.ok) throw new Error(payload?.error || 'The request could not be completed.');
   return payload;
 }
 
@@ -65,46 +94,91 @@ function setAuthMessage(message = '', isError = true) {
   elements.authMessage.classList.toggle('is-success', Boolean(message) && !isError);
 }
 
-function formatClock(seconds) {
-  const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
-  const remainder = (seconds % 60).toString().padStart(2, '0');
-  return `${minutes}:${remainder}`;
-}
-
-function updateClocks() {
-  elements.playerClock.textContent = formatClock(playerSeconds);
-  elements.opponentClock.textContent = formatClock(opponentSeconds);
-  const whiteToMove = game && game.turn() === 'w';
-  elements.playerClock.classList.toggle('active', Boolean(whiteToMove));
-  elements.opponentClock.classList.toggle('active', Boolean(game && !whiteToMove));
-}
-
-function stopClock() {
-  window.clearInterval(clockInterval);
-  clockInterval = null;
-}
-
-function startClock() {
-  stopClock();
-  clockInterval = window.setInterval(() => {
-    if (!game || game.game_over() || terminalSubmitted) return;
-    if (game.turn() === 'w') {
-      playerSeconds = Math.max(0, playerSeconds - 1);
-    } else {
-      opponentSeconds = Math.max(0, opponentSeconds - 1);
-    }
-    updateClocks();
-    if (playerSeconds === 0 || opponentSeconds === 0) {
-      const result = playerSeconds === 0 ? 'loss' : 'win';
-      submitManualResult(result, result === 'win' ? 'Oponente ficou sem tempo.' : 'Seu tempo acabou.');
-    }
-  }, 1000);
-}
-
 function setStats(stats) {
   const rating = Number(stats.current_rating);
   elements.sidebarRating.textContent = `${rating} rating`;
   elements.boardRating.textContent = rating;
+}
+
+function setQueueStatus(message, waiting = false) {
+  elements.queueStatus.textContent = message;
+  elements.leaveQueueButton.classList.toggle('is-hidden', !waiting);
+  elements.newGameFromPanel.disabled = waiting;
+  elements.newGameButton.disabled = waiting;
+  elements.newGameFromPanel.innerHTML = waiting ? 'Procurando adversário…' : 'Encontrar adversário <span>→</span>';
+  elements.newGameButton.innerHTML = waiting ? 'Na fila…' : 'Encontrar adversário <span>→</span>';
+}
+
+function formatMoves(moves) {
+  elements.moveCount.textContent = Math.ceil(moves.length / 2);
+  if (!moves.length) {
+    elements.moveList.innerHTML = '<p class="empty-state">Faça seu primeiro lance para começar.</p>';
+    return;
+  }
+  elements.moveList.innerHTML = '';
+  for (let index = 0; index < moves.length; index += 2) {
+    const row = document.createElement('div');
+    row.className = 'move-row';
+    row.innerHTML = `<span class="move-number">${(index / 2) + 1}.</span><span class="move-san">${moves[index]?.san || '—'}</span><span class="move-san">${moves[index + 1]?.san || '—'}</span>`;
+    elements.moveList.appendChild(row);
+  }
+  elements.moveList.scrollTop = elements.moveList.scrollHeight;
+}
+
+function setClockDisplay(seconds, element) {
+  const safeSeconds = Math.max(0, Number(seconds) || 600);
+  const minutes = Math.floor(safeSeconds / 60).toString().padStart(2, '0');
+  const remainder = (safeSeconds % 60).toString().padStart(2, '0');
+  element.textContent = `${minutes}:${remainder}`;
+}
+
+function updateBoardStatus() {
+  if (!currentGameState || !game) {
+    elements.gameStatus.textContent = 'Entre na fila para jogar';
+    elements.panelStatusText.textContent = 'Aguardando você entrar no matchmaking';
+    return;
+  }
+  if (currentGameState.status === 'finished') {
+    const result = currentGameState.result === 'draw'
+      ? 'Empate'
+      : currentGameState.result === currentGameState.playerColor ? 'Você venceu' : 'Você perdeu';
+    elements.gameStatus.textContent = result;
+    elements.panelStatusText.textContent = `${result} • Partida encerrada`;
+    return;
+  }
+  const turnColor = game.turn() === 'w' ? 'white' : 'black';
+  const yourTurn = turnColor === currentGameState.playerColor;
+  const label = turnColor === 'white' ? 'Brancas' : 'Pretas';
+  elements.gameStatus.textContent = yourTurn ? 'Sua vez' : `Aguardando ${label.toLowerCase()}`;
+  elements.panelStatusText.textContent = yourTurn ? 'Sua vez de jogar' : 'Aguardando o adversário';
+}
+
+function setIdleBoard() {
+  currentGameId = null;
+  currentGameState = null;
+  movePending = false;
+  game = new Chess();
+  if (board) {
+    board.position(game.fen());
+    board.orientation('white');
+  } else {
+    board = Chessboard('board', {
+      draggable: true,
+      position: game.fen(),
+      orientation: 'white',
+      pieceTheme: 'https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/img/chesspieces/wikipedia/{piece}.png',
+      onDragStart,
+      onDrop,
+      onSnapEnd,
+    });
+  }
+  formatMoves([]);
+  setClockDisplay(600, elements.playerClock);
+  setClockDisplay(600, elements.opponentClock);
+  elements.playerClock.classList.add('active');
+  elements.opponentClock.classList.remove('active');
+  updateBoardStatus();
+  setQueueStatus('Você ainda não está na fila.');
 }
 
 function showDashboard(payload) {
@@ -114,12 +188,14 @@ function showDashboard(payload) {
   const initial = username.charAt(0).toUpperCase();
   elements.profileUsername.textContent = username;
   elements.topbarUsername.textContent = username.toUpperCase();
-  elements.topbarAvatar.textContent = initial;
+  document.querySelector('#topbar-avatar').textContent = initial;
   elements.profileAvatar.textContent = initial;
   elements.boardUsername.textContent = username;
   elements.boardAvatar.textContent = initial;
   setStats(payload.stats);
-  startGame();
+  setIdleBoard();
+  showSection('play');
+  pollMatchmakingStatus();
 }
 
 function showAuth() {
@@ -149,12 +225,12 @@ async function submitAuth(event) {
   setAuthMessage('');
   elements.authSubmit.disabled = true;
   const formData = new FormData(elements.authForm);
-  const credentials = { username: formData.get('username'), password: formData.get('password') };
-
   try {
-    const payload = await api(`/api/auth/${authMode === 'signup' ? 'signup' : 'login'}`, { method: 'POST', body: JSON.stringify(credentials) });
-    const session = await api('/api/auth/me');
-    showDashboard(session || payload);
+    await api(`/api/auth/${authMode === 'signup' ? 'signup' : 'login'}`, {
+      method: 'POST',
+      body: JSON.stringify({ username: formData.get('username'), password: formData.get('password') }),
+    });
+    showDashboard(await api('/api/auth/me'));
   } catch (error) {
     setAuthMessage(error.message);
   } finally {
@@ -162,111 +238,149 @@ async function submitAuth(event) {
   }
 }
 
-function isPlayersTurn(piece) {
-  return (game.turn() === 'w' && piece.search(/^b/) !== -1) || (game.turn() === 'b' && piece.search(/^w/) !== -1);
-}
-
 function onDragStart(source, piece) {
-  return !game.game_over() && !isPlayersTurn(piece);
+  if (!currentGameState || currentGameState.status !== 'active' || movePending) return false;
+  const expectedColor = game.turn() === 'w' ? 'white' : 'black';
+  if (expectedColor !== currentGameState.playerColor) return false;
+  return !((game.turn() === 'w' && piece.search(/^b/) !== -1) || (game.turn() === 'b' && piece.search(/^w/) !== -1));
 }
 
 function onDrop(source, target) {
-  const move = game.move({ from: source, to: target, promotion: 'q' });
-  if (move === null) return 'snapback';
-  board.position(game.fen());
-  renderMoves();
-  updateGameStatus();
-  return undefined;
+  if (!currentGameId || movePending) return 'snapback';
+  submitMove(source, target);
+  return 'snapback';
 }
 
 function onSnapEnd() {
-  board.position(game.fen());
+  if (currentGameState) board.position(currentGameState.fen);
 }
 
-function renderMoves() {
-  const history = game.history();
-  elements.moveCount.textContent = Math.ceil(history.length / 2);
-  if (!history.length) {
-    elements.moveList.innerHTML = '<p class="empty-state">Faça seu primeiro lance para começar.</p>';
-    return;
-  }
-  elements.moveList.innerHTML = '';
-  for (let index = 0; index < history.length; index += 2) {
-    const row = document.createElement('div');
-    row.className = 'move-row';
-    row.innerHTML = `<span class="move-number">${(index / 2) + 1}.</span><span class="move-san">${history[index] || '—'}</span><span class="move-san">${history[index + 1] || '—'}</span>`;
-    elements.moveList.appendChild(row);
-  }
-  elements.moveList.scrollTop = elements.moveList.scrollHeight;
-}
-
-function getTerminalState() {
-  if (game.in_checkmate()) {
-    const winner = game.turn() === 'w' ? 'Black' : 'White';
-    return { result: winner === 'White' ? 'win' : 'loss', status: `${winner} vence por xeque-mate`, state: 'Xeque-mate' };
-  }
-  if (game.in_draw()) {
-    let reason = 'Empate';
-    if (game.in_stalemate()) reason = 'Afogamento';
-    if (game.in_threefold_repetition()) reason = 'Repetição tripla';
-    if (game.insufficient_material()) reason = 'Material insuficiente';
-    if (game.isDrawByFiftyMoves && game.isDrawByFiftyMoves()) reason = 'Regra dos 50 lances';
-    return { result: 'draw', status: `${reason} declarado`, state: 'Empate' };
-  }
-  return null;
-}
-
-async function submitManualResult(result, message) {
-  if (terminalSubmitted) return;
-  terminalSubmitted = true;
-  stopClock();
-  elements.gameStatus.textContent = message;
-  elements.panelStatusText.textContent = 'Salvando resultado...';
+async function submitMove(from, to) {
+  movePending = true;
   try {
-    const payload = await api('/api/games/result', { method: 'POST', body: JSON.stringify({ result }) });
-    setStats(payload.stats);
-    elements.panelStatusText.textContent = 'Resultado salvo no seu perfil';
+    const payload = await api(`/api/multiplayer/games/${currentGameId}/moves`, {
+      method: 'POST',
+      body: JSON.stringify({ from, to, promotion: 'q' }),
+    });
+    applyGameState(payload.game);
   } catch (error) {
-    terminalSubmitted = false;
+    elements.panelStatusText.textContent = error.message;
+  } finally {
+    movePending = false;
+  }
+}
+
+function applyGameState(gameState) {
+  currentGameState = gameState;
+  currentGameId = gameState.id;
+  game = new Chess(gameState.fen);
+  board.position(gameState.fen, false);
+  board.orientation(gameState.playerColor);
+  formatMoves(gameState.moves || []);
+  updateBoardStatus();
+  setQueueStatus('Partida encontrada.', false);
+  if (gameState.status === 'finished') stopGamePolling();
+}
+
+async function syncGame() {
+  if (!currentGameId || movePending) return;
+  try {
+    const payload = await api(`/api/multiplayer/games/${currentGameId}`);
+    applyGameState(payload.game);
+  } catch (error) {
     elements.panelStatusText.textContent = error.message;
   }
 }
 
-function updateGameStatus() {
-  const terminal = getTerminalState();
-  if (terminal) {
-    stopClock();
-    elements.gameStatus.textContent = terminal.status;
-    elements.panelStatusText.textContent = `${terminal.state} • Salvando resultado...`;
-    submitManualResult(terminal.result, terminal.status);
-    updateClocks();
-    return;
-  }
-  const turn = game.turn() === 'w' ? 'Brancas' : 'Pretas';
-  const inCheck = game.in_check();
-  elements.gameStatus.textContent = inCheck ? `${turn} em xeque` : `${turn} jogam`;
-  elements.panelStatusText.textContent = inCheck ? `${turn} precisam responder ao xeque` : `Aguardando as ${turn.toLowerCase()}`;
-  updateClocks();
+function startGamePolling() {
+  stopGamePolling();
+  gamePollingTimer = window.setInterval(syncGame, 1400);
 }
 
-function startGame() {
-  stopClock();
-  game = new Chess();
-  terminalSubmitted = false;
-  playerSeconds = 600;
-  opponentSeconds = 600;
-  if (board) board.destroy();
-  board = Chessboard('board', {
-    draggable: true,
-    position: game.fen(),
-    pieceTheme: 'https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/img/chesspieces/wikipedia/{piece}.png',
-    onDragStart,
-    onDrop,
-    onSnapEnd,
-  });
-  renderMoves();
-  updateGameStatus();
-  startClock();
+function stopGamePolling() {
+  window.clearInterval(gamePollingTimer);
+  gamePollingTimer = null;
+}
+
+function stopMatchmakingPolling() {
+  window.clearInterval(matchmakingTimer);
+  matchmakingTimer = null;
+}
+
+async function handleMatchmakingStatus(payload) {
+  if (payload.state === 'matched') {
+    stopMatchmakingPolling();
+    applyGameState(payload.game);
+    setPanel('match');
+    startGamePolling();
+    return;
+  }
+  if (payload.state === 'waiting') {
+    setQueueStatus('Na fila. Procurando um adversário real…', true);
+    return;
+  }
+  setQueueStatus('Você ainda não está na fila.');
+}
+
+async function pollMatchmakingStatus() {
+  try {
+    const payload = await api('/api/matchmaking/status');
+    await handleMatchmakingStatus(payload);
+    if (payload.state === 'waiting' && !matchmakingTimer) {
+      matchmakingTimer = window.setInterval(async () => {
+        try {
+          await handleMatchmakingStatus(await api('/api/matchmaking/status'));
+        } catch (error) {
+          elements.queueStatus.textContent = error.message;
+        }
+      }, 1800);
+    }
+  } catch (error) {
+    elements.queueStatus.textContent = 'Entre na fila para encontrar um adversário.';
+  }
+}
+
+async function joinMatchmaking() {
+  if (currentGameState?.status === 'active') return;
+  setQueueStatus('Entrando na fila…', true);
+  try {
+    const payload = await api('/api/matchmaking/join', { method: 'POST' });
+    await handleMatchmakingStatus(payload);
+    if (payload.state === 'waiting' && !matchmakingTimer) {
+      matchmakingTimer = window.setInterval(async () => {
+        try {
+          await handleMatchmakingStatus(await api('/api/matchmaking/status'));
+        } catch (error) {
+          elements.queueStatus.textContent = error.message;
+        }
+      }, 1800);
+    }
+  } catch (error) {
+    setQueueStatus(error.message);
+  }
+}
+
+async function leaveMatchmaking() {
+  stopMatchmakingPolling();
+  try {
+    await api('/api/matchmaking/leave', { method: 'POST' });
+    setQueueStatus('Você saiu da fila.');
+  } catch (error) {
+    elements.queueStatus.textContent = error.message;
+  }
+}
+
+async function finishGame(result) {
+  if (!currentGameId || currentGameState?.status !== 'active') return;
+  try {
+    const payload = await api(`/api/multiplayer/games/${currentGameId}/finish`, {
+      method: 'POST',
+      body: JSON.stringify({ result }),
+    });
+    applyGameState(payload.game);
+  } catch (error) {
+    elements.panelStatusText.textContent = error.message;
+  }
 }
 
 function setPanel(panelName) {
@@ -274,14 +388,33 @@ function setPanel(panelName) {
   document.querySelectorAll('.panel-view').forEach((panel) => panel.classList.toggle('active', panel.id === `${panelName}-panel`));
 }
 
+function showSection(section) {
+  const isPlay = section === 'play';
+  elements.playPage.classList.toggle('is-hidden', !isPlay);
+  elements.sectionView.classList.toggle('is-hidden', isPlay);
+  document.querySelectorAll('[data-section]').forEach((item) => item.classList.toggle('active', item.dataset.section === section));
+  if (!isPlay) {
+    const data = sectionData[section] || sectionData.community;
+    elements.sectionEyebrow.textContent = data.eyebrow;
+    elements.sectionTitle.textContent = data.title;
+    elements.sectionCopy.textContent = data.copy;
+    elements.sectionContent.innerHTML = data.content;
+    elements.sectionContent.querySelectorAll('[data-section]').forEach((button) => button.addEventListener('click', () => showSection(button.dataset.section)));
+  }
+  elements.sidebar.classList.remove('open');
+}
+
 async function logout() {
   try {
     await api('/api/auth/logout', { method: 'POST' });
   } finally {
-    stopClock();
+    stopMatchmakingPolling();
+    stopGamePolling();
     if (board) board.destroy();
     board = null;
     game = null;
+    currentGameId = null;
+    currentGameState = null;
     showAuth();
     elements.authForm.reset();
     switchAuthMode('login');
@@ -290,8 +423,7 @@ async function logout() {
 
 async function bootstrap() {
   try {
-    const session = await api('/api/auth/me');
-    showDashboard(session);
+    showDashboard(await api('/api/auth/me'));
   } catch (error) {
     showAuth();
   }
@@ -299,17 +431,14 @@ async function bootstrap() {
 
 document.querySelectorAll('.tab-button').forEach((button) => button.addEventListener('click', () => switchAuthMode(button.dataset.mode)));
 document.querySelectorAll('.panel-tab').forEach((button) => button.addEventListener('click', () => setPanel(button.dataset.panel)));
-document.querySelectorAll('.nav-item, .bottom-nav button').forEach((button) => button.addEventListener('click', () => {
-  document.querySelectorAll('.nav-item, .bottom-nav button').forEach((item) => item.classList.remove('active'));
-  button.classList.add('active');
-  elements.sidebar.classList.remove('open');
-}));
+document.querySelectorAll('[data-section]').forEach((button) => button.addEventListener('click', () => showSection(button.dataset.section)));
 elements.authForm.addEventListener('submit', submitAuth);
 elements.logoutButton.addEventListener('click', logout);
-elements.newGameButton.addEventListener('click', startGame);
-elements.newGameFromPanel.addEventListener('click', () => { startGame(); setPanel('match'); });
-elements.drawButton.addEventListener('click', () => submitManualResult('draw', 'Empate oferecido'));
-elements.resignButton.addEventListener('click', () => submitManualResult('loss', 'Você desistiu da partida'));
+elements.newGameButton.addEventListener('click', joinMatchmaking);
+elements.newGameFromPanel.addEventListener('click', joinMatchmaking);
+elements.leaveQueueButton.addEventListener('click', leaveMatchmaking);
+elements.drawButton.addEventListener('click', () => finishGame('draw'));
+elements.resignButton.addEventListener('click', () => finishGame('resign'));
 elements.flipBoardButton.addEventListener('click', () => board && board.flip());
 elements.mobileMenuButton.addEventListener('click', () => elements.sidebar.classList.toggle('open'));
 bootstrap();

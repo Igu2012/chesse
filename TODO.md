@@ -32,13 +32,27 @@
 - [x] The backend increments `wins`, `losses`, or `draws` for the logged-in user in `player_stats` using a transaction.
 - [x] Duplicate frontend terminal events are prevented for the same game.
 
-## 6. Deliver the post-login dashboard
+## 6. Deliver real-player matchmaking and synchronized games
+
+- [x] The primary Play action enters the authenticated player into a persistent Neon-backed matchmaking queue.
+- [x] A waiting player remains in the queue until another eligible authenticated player joins, then both players receive the same game id.
+- [x] The server creates `chess_games` and `chess_game_moves` tables idempotently without changing the existing user tables.
+- [x] The backend validates turn ownership and every move with chess.js before saving the new FEN and move history.
+- [x] Both browsers poll the authoritative game state and see new moves, game completion, resignation, draws, and updated results.
+
+## 7. Make the dashboard navigation usable
+
+- [x] The Play, Problems, Learn, Watch, and Community navigation items switch to working application sections.
+- [x] Mobile navigation remains available through the bottom navigation bar.
+- [x] The Play screen exposes queue status, leave-queue control, move history, match tabs, and game actions.
+
+## 8. Deliver the post-login dashboard
 
 - [x] The dashboard displays the player's username and current rating.
 - [x] The dashboard fetches and displays wins, losses, and draws from Neon.
 - [x] The current board, move status, game result, and statistics are visible in one responsive screen.
 
-## 7. Publish the source repository
+## 9. Publish the source repository
 
 - [x] Push the accepted project to a public GitHub repository named `chesse` after the owner confirms the GitHub target.
 - [x] Do not commit `.env`, `.env.*`, credentials, or other runtime secrets.
