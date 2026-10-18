@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A focused chess dashboard for playing positions and tracking your record.">
+    <title>Chesse | Play the position in front of you</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard-1.0.0.min.css">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="site-shell">
+      <section class="auth-view" id="auth-view">
+        <div class="auth-intro">
+          <div class="brand-lockup"><span class="brand-mark">C</span><span>CHESSE</span></div>
+          <p class="eyebrow">THE DAILY CHESS DESK</p>
+          <h1>Play the position in front of you.</h1>
+          <p class="intro-copy">A clean board, a clear record, and no noise between you and the next move.</p>
+          <div class="intro-rule"></div>
+          <p class="intro-note">Your games are tracked against your player profile in Neon PostgreSQL.</p>
+        </div>
+
+        <div class="auth-card panel">
+          <div class="auth-heading">
+            <p class="eyebrow" id="auth-eyebrow">WELCOME BACK</p>
+            <h2 id="auth-title">Sign in to your desk</h2>
+            <p id="auth-subtitle">Keep your board and record in one place.</p>
+          </div>
+          <div class="auth-tabs" role="tablist" aria-label="Authentication mode">
+            <button class="tab-button active" type="button" data-mode="login" role="tab" aria-selected="true">Sign in</button>
+            <button class="tab-button" type="button" data-mode="signup" role="tab" aria-selected="false">Create account</button>
+          </div>
+          <form id="auth-form" novalidate>
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" autocomplete="username" minlength="3" maxlength="24" pattern="[A-Za-z0-9_]+" required>
+            <span class="field-hint">3–24 letters, numbers, or underscores.</span>
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" minlength="8" maxlength="128" required>
+            <span class="field-hint" id="password-hint">Use at least 8 characters.</span>
+            <button class="button button-primary" type="submit" id="auth-submit">Sign in <span aria-hidden="true">↗</span></button>
+          </form>
+          <p class="form-message" id="auth-message" role="alert"></p>
+        </div>
+      </section>
+
+      <section class="dashboard-view is-hidden" id="dashboard-view">
+        <header class="topbar">
+          <div class="brand-lockup"><span class="brand-mark">C</span><span>CHESSE</span></div>
+          <div class="topbar-meta"><span class="live-dot"></span><span>LIVE DESK</span><span class="topbar-divider"></span><span id="topbar-username">PLAYER</span></div>
+          <button class="button button-quiet" type="button" id="logout-button">Sign out</button>
+        </header>
+
+        <div class="dashboard-grid">
+          <aside class="side-rail">
+            <div class="rail-block">
+              <p class="eyebrow">PLAYER PROFILE</p>
+              <div class="profile-row">
+                <div class="avatar" id="profile-avatar">C</div>
+                <div>
+                  <h2 id="profile-username">Player</h2>
+                  <p class="muted">Club desk member</p>
+                </div>
+              </div>
+            </div>
+            <div class="rail-block rail-stat-block">
+              <div class="rail-label-row"><span class="eyebrow">CURRENT RATING</span><span class="rating-spark">↗</span></div>
+              <p class="rating-number" id="rating-number">1200</p>
+              <p class="muted">Classical desk rating</p>
+            </div>
+            <div class="rail-block rail-note">
+              <p class="eyebrow">PLAYING NOTE</p>
+              <p>Every move is checked before it reaches the board. Find the clean line.</p>
+            </div>
+          </aside>
+
+          <section class="game-area">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">BOARD 01 / CLASSICAL</p>
+                <h1>Current position</h1>
+              </div>
+              <div class="board-status"><span class="live-dot"></span><span id="game-status">White to move</span></div>
+            </div>
+            <div class="board-layout">
+              <div class="board-frame"><div id="board" class="board"></div></div>
+              <div class="game-sidecard panel">
+                <p class="eyebrow">POSITION REPORT</p>
+                <div class="position-report">
+                  <div><span class="report-label">Turn</span><strong id="turn-report">White</strong></div>
+                  <div><span class="report-label">State</span><strong id="state-report">In play</strong></div>
+                </div>
+                <p class="game-message" id="game-message">Drag a piece to make your move.</p>
+                <button class="button button-primary button-full" type="button" id="new-game-button">New game <span aria-hidden="true">↗</span></button>
+              </div>
+            </div>
+          </section>
+
+          <aside class="scorecard panel">
+            <div class="scorecard-heading"><p class="eyebrow">YOUR RECORD</p><span class="record-mark">♞</span></div>
+            <p class="scorecard-title">The numbers<br><em>in view.</em></p>
+            <div class="record-list">
+              <div class="record-row"><span class="record-index">01</span><span>Wins</span><strong id="wins-stat">0</strong></div>
+              <div class="record-row"><span class="record-index">02</span><span>Losses</span><strong id="losses-stat">0</strong></div>
+              <div class="record-row"><span class="record-index">03</span><span>Draws</span><strong id="draws-stat">0</strong></div>
+            </div>
+            <div class="scorecard-footer"><span class="live-dot"></span><span>Synced from player stats</span></div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard-1.0.0.min.js"></script>
+    <script src="/app.js" defer></script>
+  </body>
+</html>
