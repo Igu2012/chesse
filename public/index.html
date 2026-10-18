@@ -54,16 +54,15 @@
             <div class="sidebar-brand"><img src="/pawn-logo.png" alt="Chesse pawn" class="sidebar-logo"><span>CHESSE</span></div>
             <nav class="global-nav" aria-label="Main navigation">
               <button class="nav-item active" type="button" data-section="play"><span class="nav-icon">♟</span><span>Jogar</span></button>
-              <button class="nav-item" type="button" data-section="problems"><span class="nav-icon">♞</span><span>Problemas</span></button>
-              <button class="nav-item" type="button" data-section="learn"><span class="nav-icon">♜</span><span>Aprender</span></button>
-              <button class="nav-item" type="button" data-section="watch"><span class="nav-icon">◉</span><span>Assistir</span></button>
-              <button class="nav-item" type="button" data-section="community"><span class="nav-icon">♙</span><span>Comunidade</span></button>
+              <button class="nav-item" type="button" data-section="training"><span class="nav-icon">♞</span><span>Training</span></button>
+              <button class="nav-item" type="button" data-section="community"><span class="nav-icon">♙</span><span>Profile</span></button>
             </nav>
             <div class="sidebar-footer">
               <div class="sidebar-account">
                 <div class="avatar" id="profile-avatar">C</div>
                 <div class="sidebar-account-copy"><strong id="profile-username">Player</strong><span id="sidebar-rating">1200 rating</span></div>
-                <span class="sidebar-more">•••</span>
+                <button class="sidebar-more" type="button" id="sidebar-more-button" aria-label="Open account menu" aria-expanded="false">•••</button>
+                <div class="account-menu is-hidden" id="account-menu"><button type="button" data-section="community">Profile</button><button type="button" id="account-menu-logout">Sign out</button></div>
               </div>
               <button class="button button-sidebar" type="button" id="logout-button">Sair</button>
             </div>
@@ -73,7 +72,7 @@
             <header class="topbar">
               <button class="mobile-menu-button" type="button" id="mobile-menu-button" aria-label="Open navigation">☰</button>
               <div class="topbar-title"><span class="live-dot"></span><span>CHESSE</span></div>
-              <div class="topbar-actions"><select id="language-select" aria-label="Language"><option value="auto">Auto</option><option value="en">English</option><option value="pt-BR">Português</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option></select><div class="topbar-account"><span id="topbar-username">PLAYER</span><div class="mini-avatar" id="topbar-avatar">P</div></div></div>
+              <div class="topbar-actions"><div class="topbar-account"><span id="topbar-username">PLAYER</span><div class="mini-avatar" id="topbar-avatar">P</div></div></div>
             </header>
 
             <main class="play-page">
@@ -126,7 +125,7 @@
             </section>
           </div>
         </div>
-        <nav class="bottom-nav" aria-label="Mobile navigation"><button class="active" type="button" data-section="play">♟<span>Jogar</span></button><button type="button" data-section="problems">♞<span>Problemas</span></button><button type="button" data-section="learn">♜<span>Aprender</span></button><button type="button" data-section="community">♙<span>Perfil</span></button></nav>
+        <nav class="bottom-nav" aria-label="Mobile navigation"><button class="active" type="button" data-section="play">♟<span>Play</span></button><button type="button" data-section="training">♞<span>Training</span></button><button type="button" data-section="community">♙<span>Profile</span></button></nav>
       </section>
     </main>
 

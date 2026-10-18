@@ -41,6 +41,7 @@ const elements = {
   resignButton: document.querySelector('#resign-button'),
   flipBoardButton: document.querySelector('#flip-board-button'),
   mobileMenuButton: document.querySelector('#mobile-menu-button'),
+  sidebarMoreButton: document.querySelector('#sidebar-more-button'),
   sidebar: document.querySelector('.global-sidebar'),
   languageSelect: document.querySelector('#language-select'),
 };
@@ -65,6 +66,7 @@ let practiceMode = 'puzzle';
 let currentLocale = 'en';
 let practiceProgress = Number(localStorage.getItem('chesse-practice-solved') || 0);
 let customizerCategory = 'background';
+let currentSection = 'play';
 
 const pieceAssets = '/assets/chesspieces/wikipedia';
 const ratAssets = {
@@ -97,25 +99,25 @@ const ratItemAssets = {
 
 const translations = {
   en: {
-    play: 'Play', problems: 'Problems', learn: 'Learn', watch: 'Watch', community: 'Profile', logout: 'Sign out',
+    play: 'Play', training: 'Training', community: 'Profile', logout: 'Sign out',
     findOpponent: 'Find an opponent', waiting: 'Waiting for a real opponent…', newGame: 'New game',
-    practice: 'Practice locally', profile: 'Player profile', history: 'Game history', save: 'Save profile',
+    practice: 'Training', trainingCopy: 'Play a complete local game against the bot.', profile: 'Player profile', history: 'Game history', save: 'Save profile',
     displayName: 'Display name', bio: 'Bio', ratColor: 'Rat color', accessory: 'Accessory', avatarMode: 'Show rat as',
     language: 'Language', noHistory: 'No completed games yet.', noPublicGames: 'No public games right now.',
-    problemsSoon: 'Daily practice', practiceCopy: 'Train locally against the rat or solve a tactical position. Your moves stay on this device.',
-    localBot: 'Play against the rat', solvePuzzle: 'Solve a puzzle', showHint: 'Show hint', spectator: 'Read-only spectator board',
+    problemsSoon: 'Training', practiceCopy: 'Play a complete local game against the rat. Your moves stay on this device.',
+    localBot: 'Play against the rat', solvePuzzle: 'Play against the rat', showHint: 'Show hint', spectator: 'Read-only spectator board',
     watchCopy: 'Watch active games without affecting the players.', loading: 'Loading…', win: 'Win', loss: 'Loss', draw: 'Draw',
     gold: 'Golden', brown: 'Brown', gray: 'Gray', pink: 'Pink', blue: 'Blue', pawn: 'Pawn', crown: 'Crown', glasses: 'Glasses', none: 'None',
     avatar: 'Avatar only', full: 'Full character only', both: 'Both', practiceTurn: 'Your turn', botTurn: 'Rat is thinking…',
   },
   'pt-BR': {
-    play: 'Jogar', problems: 'Problemas', learn: 'Aprender', watch: 'Assistir', community: 'Perfil', logout: 'Sair',
+    play: 'Jogar', training: 'Treino', community: 'Perfil', logout: 'Sair',
     findOpponent: 'Encontrar adversário', waiting: 'Procurando um adversário real…', newGame: 'Nova partida',
-    practice: 'Treinar localmente', profile: 'Perfil do jogador', history: 'Histórico de partidas', save: 'Salvar perfil',
+    practice: 'Treino', trainingCopy: 'Jogue uma partida local completa contra o bot.', profile: 'Perfil do jogador', history: 'Histórico de partidas', save: 'Salvar perfil',
     displayName: 'Nome de exibição', bio: 'Bio', ratColor: 'Cor do rato', accessory: 'Acessório', avatarMode: 'Mostrar rato como',
     language: 'Idioma', noHistory: 'Nenhuma partida encerrada ainda.', noPublicGames: 'Nenhuma partida pública agora.',
-    problemsSoon: 'Treino diário', practiceCopy: 'Treine localmente contra o rato ou resolva uma posição tática. Seus lances ficam neste dispositivo.',
-    localBot: 'Jogar contra o rato', solvePuzzle: 'Resolver problema', showHint: 'Mostrar dica', spectator: 'Tabuleiro para espectador',
+    problemsSoon: 'Treino', practiceCopy: 'Jogue uma partida local completa contra o rato. Seus lances ficam neste dispositivo.',
+    localBot: 'Jogar contra o rato', solvePuzzle: 'Jogar contra o rato', showHint: 'Mostrar dica', spectator: 'Tabuleiro para espectador',
     watchCopy: 'Assista a partidas ativas sem interferir nos jogadores.', loading: 'Carregando…', win: 'Vitória', loss: 'Derrota', draw: 'Empate',
     gold: 'Dourado', brown: 'Marrom', gray: 'Cinza', pink: 'Rosa', blue: 'Azul', pawn: 'Peão', crown: 'Coroa', glasses: 'Óculos', none: 'Nenhum',
     avatar: 'Somente avatar', full: 'Somente personagem', both: 'Os dois', practiceTurn: 'Sua vez', botTurn: 'O rato está pensando…',
@@ -125,8 +127,8 @@ const translations = {
   de: { play: 'Spielen', problems: 'Aufgaben', learn: 'Lernen', watch: 'Zuschauen', community: 'Profil', logout: 'Abmelden', findOpponent: 'Gegner finden', waiting: 'Suche einen echten Gegner…', newGame: 'Neue Partie', practice: 'Lokal trainieren', profile: 'Spielerprofil', history: 'Partieverlauf', save: 'Profil speichern', displayName: 'Anzeigename', bio: 'Bio', ratColor: 'Rattenfarbe', accessory: 'Accessoire', avatarMode: 'Ratte anzeigen als', language: 'Sprache', noHistory: 'Noch keine beendeten Partien.', noPublicGames: 'Keine öffentlichen Partien.', problemsSoon: 'Tägliches Training', practiceCopy: 'Trainiere lokal gegen die Ratte oder löse eine taktische Stellung.', localBot: 'Gegen die Ratte spielen', solvePuzzle: 'Aufgabe lösen', showHint: 'Tipp anzeigen', spectator: 'Zuschauerbrett', watchCopy: 'Aktive Partien ansehen, ohne einzugreifen.', loading: 'Laden…', win: 'Sieg', loss: 'Niederlage', draw: 'Remis', gold: 'Gold', brown: 'Braun', gray: 'Grau', pink: 'Rosa', blue: 'Blau', pawn: 'Bauer', crown: 'Krone', glasses: 'Brille', none: 'Keine', avatar: 'Nur Avatar', full: 'Nur Figur', both: 'Beides', practiceTurn: 'Du bist am Zug', botTurn: 'Die Ratte denkt…' },
 };
 
-Object.assign(translations.en, { username: 'Username', password: 'Password', signIn: 'Sign in', createAccount: 'Create account', welcome: 'Welcome back', joinDesk: 'Join the desk', center: 'Control the center', castle: 'Castle early', centerCopy: 'Fight for the central squares and develop your minor pieces before moving the same piece twice.', castleCopy: 'Keep your king safe and connect your rooks before starting a central attack.', learning: 'Learning center' });
-Object.assign(translations['pt-BR'], { username: 'Usuário', password: 'Senha', signIn: 'Entrar', createAccount: 'Criar conta', welcome: 'Bem-vindo de volta', joinDesk: 'Entre para jogar', center: 'Controle o centro', castle: 'Faça o roque', centerCopy: 'Dispute as casas centrais e desenvolva suas peças menores antes de mover a mesma peça duas vezes.', castleCopy: 'Coloque o rei em segurança e conecte as torres antes de iniciar um ataque no centro.', learning: 'Centro de aprendizado' });
+Object.assign(translations.en, { username: 'Username', password: 'Password', signIn: 'Sign in', createAccount: 'Create account', welcome: 'Welcome back', joinDesk: 'Join the desk', center: 'Control the center', castle: 'Castle early', centerCopy: 'Fight for the central squares and develop your minor pieces before moving the same piece twice.', castleCopy: 'Keep your king safe and connect your rooks before starting a central attack.', learning: 'Learning center', flipBoard: 'Flip board', leaveQueue: 'Leave queue', matchTab: 'Game', playTab: 'Play', currentGame: 'Current game', newGamePanel: 'New game' });
+Object.assign(translations['pt-BR'], { username: 'Usuário', password: 'Senha', signIn: 'Entrar', createAccount: 'Criar conta', welcome: 'Bem-vindo de volta', joinDesk: 'Entre para jogar', center: 'Controle o centro', castle: 'Faça o roque', centerCopy: 'Dispute as casas centrais e desenvolva suas peças menores antes de mover a mesma peça duas vezes.', castleCopy: 'Coloque o rei em segurança e conecte as torres antes de iniciar um ataque no centro.', learning: 'Centro de aprendizado', flipBoard: 'Virar tabuleiro', leaveQueue: 'Sair da fila', matchTab: 'Partida', playTab: 'Jogar', currentGame: 'Partida atual', newGamePanel: 'Nova partida' });
 Object.keys(translations).filter((locale) => !['en', 'pt-BR'].includes(locale)).forEach((locale) => Object.assign(translations[locale], translations.en));
 
 function t(key) {
@@ -178,7 +180,7 @@ function ratCharacterMarkup(rat = {}, mode = 'full') {
     hair: rat.hair || 'none', shirt: rat.shirt || 'none', pants: rat.pants || 'none',
     beard: rat.beard || 'none', accessory: rat.accessory || 'none',
   };
-  const item = (name, value, extraClass = '') => ratItemAssets[value] ? `<img class="rat-layer rat-image-layer rat-image-${name} rat-image-item-${value} ${extraClass}" src="${ratItemAssets[value]}" alt="" aria-hidden="true">` : '';
+  const item = (name, value, extraClass = '') => (name === 'shirt' || name === 'pants') ? '' : (ratItemAssets[value] ? `<img class="rat-layer rat-image-layer rat-image-${name} rat-image-item-${value} ${extraClass}" src="${ratItemAssets[value]}" alt="" aria-hidden="true">` : '');
   return `<span class="rat-stage rat-stage-${mode} rat-bg-${safe.background} rat-fur-${safe.color}">
     <img src="${mode === 'avatar' ? ratAssets.avatar : ratAssets.full}" alt="Chesse rat character" class="rat-base">
     ${item('shirt', safe.shirt)}${item('pants', safe.pants)}${item('hair', safe.hair)}${item('hat', safe.hat)}${item('beard', safe.beard)}${item('accessory', safe.accessory)}
@@ -202,9 +204,7 @@ function applyProfile(user) {
     avatar.innerHTML = showRatAvatar ? ratCharacterMarkup(user.rat, 'avatar') : initial;
     avatar.classList.toggle('has-rat-avatar', showRatAvatar);
   });
-  const requestedLocale = localStorage.getItem('chesse-locale') || user.locale || 'auto';
-  currentLocale = requestedLocale === 'auto' ? detectLocale() : (translations[requestedLocale] ? requestedLocale : 'en');
-  if (elements.languageSelect) elements.languageSelect.value = requestedLocale;
+  currentLocale = detectLocale();
   applyTranslations();
 }
 
@@ -218,7 +218,7 @@ function detectLocale() {
 }
 
 function applyTranslations() {
-  const navKeys = { play: 'play', problems: 'problems', learn: 'learn', watch: 'watch', community: 'community' };
+  const navKeys = { play: 'play', training: 'training', community: 'community' };
   document.querySelectorAll('.nav-item[data-section]').forEach((button) => {
     const label = button.querySelector('span:last-child');
     if (label && navKeys[button.dataset.section]) label.textContent = t(navKeys[button.dataset.section]);
@@ -228,7 +228,13 @@ function applyTranslations() {
     if (label && navKeys[button.dataset.section]) label.textContent = t(navKeys[button.dataset.section]);
   });
   elements.logoutButton.textContent = t('logout');
-  elements.languageSelect?.setAttribute('aria-label', t('language'));
+  if (elements.mobileMenuButton) elements.mobileMenuButton.setAttribute('aria-label', currentLocale === 'pt-BR' ? 'Abrir navegação' : 'Open navigation');
+  if (elements.flipBoardButton?.querySelector('span')) elements.flipBoardButton.querySelector('span').textContent = t('flipBoard');
+  if (elements.leaveQueueButton) elements.leaveQueueButton.textContent = t('leaveQueue');
+  document.querySelector('.panel-tab[data-panel="match"]')?.replaceChildren(document.createTextNode(t('matchTab')));
+  document.querySelector('.panel-tab[data-panel="new-game"]')?.replaceChildren(document.createTextNode(t('playTab')));
+  document.querySelector('#match-panel h2')?.replaceChildren(document.createTextNode(t('currentGame')));
+  document.querySelector('#new-game-panel h2')?.replaceChildren(document.createTextNode(t('newGamePanel')));
   const usernameLabel = document.querySelector('label[for="username"]');
   const passwordLabel = document.querySelector('label[for="password"]');
   if (usernameLabel) usernameLabel.textContent = t('username');
@@ -238,9 +244,10 @@ function applyTranslations() {
   const authEyebrow = document.querySelector('#auth-eyebrow');
   if (introEyebrow) introEyebrow.textContent = currentLocale === 'pt-BR' ? 'A MESA DIÁRIA DE XADREZ' : 'THE DAILY CHESS DESK';
   if (authEyebrow) authEyebrow.textContent = authMode === 'signup' ? t('joinDesk') : t('welcome');
+  if (currentSection !== 'play' && elements.dashboardView && !elements.dashboardView.classList.contains('is-hidden')) showSection(currentSection, false);
 }
 
-function boardMarkup(chess, orientation = 'white', interactive = false) {
+function boardMarkup(chess, orientation = 'white', interactive = false, selected = null, targets = []) {
   const files = orientation === 'white' ? ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] : ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'];
   const ranks = orientation === 'white' ? [8, 7, 6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6, 7, 8];
   return ranks.flatMap((rank, rankIndex) => files.map((file, fileIndex) => {
@@ -249,7 +256,8 @@ function boardMarkup(chess, orientation = 'white', interactive = false) {
     const isLight = (file.charCodeAt(0) - 97 + rank) % 2 === 0;
     const pieceMarkup = piece ? `<img class="board-piece" src="${pieceAssets}/${piece.color}${piece.type.toUpperCase()}.png" alt="${piece.color === 'w' ? 'White' : 'Black'} ${piece.type}">` : '';
     const labels = `${fileIndex === 0 ? `<span class="board-rank-label">${rank}</span>` : ''}${rankIndex === 7 ? `<span class="board-file-label">${file}</span>` : ''}`;
-    return `<div class="board-square ${isLight ? 'square-light' : 'square-dark'}" ${interactive ? `data-practice-square="${square}"` : ''}>${labels}${pieceMarkup}</div>`;
+    const stateClass = `${square === selected ? ' square-selected' : ''}${targets.includes(square) ? (piece ? ' square-capture' : ' square-legal') : ''}`;
+    return `<div class="board-square ${isLight ? 'square-light' : 'square-dark'}${stateClass}" ${interactive ? `data-practice-square="${square}"` : ''}>${labels}${pieceMarkup}</div>`;
   })).join('');
 }
 
@@ -326,7 +334,7 @@ function renderBoard() {
       button.dataset.square = square;
       button.setAttribute('aria-label', square);
       if (square === selectedSquare) button.classList.add('square-selected');
-      if (legalTargets.includes(square)) button.classList.add('square-legal');
+      if (legalTargets.includes(square)) button.classList.add(piece ? 'square-capture' : 'square-legal');
       if (fileIndex === 0) {
         const rankLabel = document.createElement('span');
         rankLabel.className = 'board-rank-label';
@@ -628,7 +636,8 @@ function setPanel(panelName) {
   document.querySelectorAll('.panel-view').forEach((panel) => panel.classList.toggle('active', panel.id === `${panelName}-panel`));
 }
 
-function showSection(section) {
+function showSection(section, updateHistory = true) {
+  currentSection = section;
   const isPlay = section === 'play';
   elements.playPage.classList.toggle('is-hidden', !isPlay);
   elements.sectionView.classList.toggle('is-hidden', isPlay);
@@ -636,9 +645,9 @@ function showSection(section) {
   elements.sidebar.classList.remove('open');
   if (!isPlay) {
     const data = sectionData[section] || sectionData.community;
-    elements.sectionEyebrow.textContent = section === 'problems' ? t('practice') : section === 'community' ? t('profile') : section === 'watch' ? t('watch') : data.eyebrow;
-    elements.sectionTitle.textContent = section === 'problems' ? t('problems') : section === 'community' ? t('profile') : section === 'watch' ? t('watch') : data.title;
-    elements.sectionCopy.textContent = section === 'problems' || section === 'watch' ? t(section === 'problems' ? 'practiceCopy' : 'watchCopy') : data.copy;
+    elements.sectionEyebrow.textContent = section === 'training' ? t('practice') : section === 'community' ? t('profile') : data.eyebrow;
+    elements.sectionTitle.textContent = section === 'training' ? t('training') : section === 'community' ? t('profile') : data.title;
+    elements.sectionCopy.textContent = section === 'training' ? t('trainingCopy') : section === 'community' ? t('profile') : data.copy;
     if (section === 'learn') {
       elements.sectionEyebrow.textContent = t('learning');
       elements.sectionTitle.textContent = t('learn');
@@ -646,7 +655,7 @@ function showSection(section) {
       elements.sectionContent.innerHTML = `<div class="learning-grid"><div class="feature-card"><span class="feature-kicker">01 / OPENING</span><h2>${t('center')}</h2><p>${t('centerCopy')}</p></div><div class="feature-card"><span class="feature-kicker">02 / SAFETY</span><h2>${t('castle')}</h2><p>${t('castleCopy')}</p></div></div>`;
       return;
     }
-    if (section === 'problems') return renderProblemsSection();
+    if (section === 'training') return renderTrainingSection();
     if (section === 'community') return renderCommunitySection();
     if (section === 'watch') return renderWatchSection();
     elements.sectionContent.innerHTML = data.content;
@@ -695,6 +704,29 @@ elements.flipBoardButton.addEventListener('click', () => {
   renderBoard();
 });
 elements.mobileMenuButton.addEventListener('click', () => elements.sidebar.classList.toggle('open'));
+elements.sidebarMoreButton?.addEventListener('click', (event) => {
+  event.stopPropagation();
+  const menu = document.querySelector('#account-menu');
+  const open = menu?.classList.toggle('is-hidden') === false;
+  elements.sidebarMoreButton.setAttribute('aria-expanded', String(open));
+});
+document.querySelector('#account-menu-logout')?.addEventListener('click', logout);
+document.addEventListener('click', (event) => {
+  if (elements.sidebar.classList.contains('open') && !elements.sidebar.contains(event.target) && event.target !== elements.mobileMenuButton) elements.sidebar.classList.remove('open');
+  const menu = document.querySelector('#account-menu');
+  if (menu && !menu.classList.contains('is-hidden') && !menu.contains(event.target) && event.target !== elements.sidebarMoreButton) {
+    menu.classList.add('is-hidden');
+    elements.sidebarMoreButton?.setAttribute('aria-expanded', 'false');
+  }
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    elements.sidebar.classList.remove('open');
+    const menu = document.querySelector('#account-menu');
+    menu?.classList.add('is-hidden');
+    elements.sidebarMoreButton?.setAttribute('aria-expanded', 'false');
+  }
+});
 bootstrap();
 
 
@@ -756,7 +788,19 @@ async function renderCommunitySection() {
       modal?.classList.add('open');
       modal?.setAttribute('aria-hidden', 'false');
     });
-    form.querySelectorAll('[data-close-customizer]').forEach((button) => button.addEventListener('click', () => {
+    form.querySelectorAll('[data-close-customizer]').forEach((button) => button.addEventListener('click', async () => {
+      if (button.classList.contains('customizer-done')) {
+        button.disabled = true;
+        try {
+          await saveProfile({ preventDefault: () => {}, currentTarget: form });
+        } catch (error) {
+          const message = form.querySelector('#profile-message');
+          if (message) { message.textContent = error.message; message.classList.add('is-error'); }
+          button.disabled = false;
+          return;
+        }
+        button.disabled = false;
+      }
       const modal = form.querySelector('#customizer-modal');
       modal?.classList.remove('open');
       modal?.setAttribute('aria-hidden', 'true');
@@ -864,13 +908,13 @@ async function loadWatchGame(gameId) {
 const practicePuzzle = { fen: '4k3/8/8/8/8/8/4R3/6K1 w - - 0 1', from: 'e2', to: 'e8', hint: 'Move the rook up the open e-file to give check.' };
 
 function practiceMarkup() {
-  const board = practiceGame ? boardMarkup(practiceGame, 'white', true) : '';
-  return `<div class="practice-layout"><div class="feature-card practice-card"><div class="practice-tabs"><button class="button ${practiceMode === 'puzzle' ? 'button-primary' : 'button-secondary'}" data-practice-mode="puzzle">${t('solvePuzzle')}</button><button class="button ${practiceMode === 'bot' ? 'button-primary' : 'button-secondary'}" data-practice-mode="bot">${t('localBot')}</button></div><p class="panel-copy">${t('practiceCopy')}</p><div class="practice-board mini-board">${board}</div><p id="practice-status" class="panel-status">${practiceMode === 'bot' ? t('practiceTurn') : 'Find the winning move.'}</p><div class="practice-actions"><button class="button button-secondary" id="practice-hint">${t('showHint')}</button><button class="button button-primary" id="practice-reset">Reset</button></div></div><div class="feature-card practice-info"><img class="rat-full" src="${ratAssets.full}" alt="Chesse rat character"><h2>${t('problemsSoon')}</h2><p>${t('practiceCopy')}</p><p class="practice-score">Solved locally: ${practiceProgress}</p></div></div>`;
+  const board = practiceGame ? boardMarkup(practiceGame, 'white', true, practiceSelectedSquare, practiceLegalTargets) : '';
+  return `<div class="practice-layout"><div class="feature-card practice-card"><p class="panel-copy">${t('practiceCopy')}</p><div class="practice-board mini-board">${board}</div><p id="practice-status" class="panel-status">${t('practiceTurn')}</p><div class="practice-actions"><button class="button button-primary" id="practice-reset">${t('newGame')}</button></div></div><div class="feature-card practice-info"><img class="rat-full" src="${ratAssets.full}" alt="Chesse rat character"><h2>${t('problemsSoon')}</h2><p>${t('trainingCopy')}</p></div></div>`;
 }
 
-function renderProblemsSection() {
-  practiceMode = 'puzzle';
-  practiceGame = new Chess(practicePuzzle.fen);
+function renderTrainingSection() {
+  practiceMode = 'bot';
+  practiceGame = new Chess();
   practiceSelectedSquare = null;
   practiceLegalTargets = [];
   elements.sectionContent.innerHTML = practiceMarkup();
@@ -878,17 +922,8 @@ function renderProblemsSection() {
 }
 
 function bindPracticeActions() {
-  elements.sectionContent.querySelectorAll('[data-practice-mode]').forEach((button) => button.addEventListener('click', () => {
-    practiceMode = button.dataset.practiceMode;
-    practiceGame = practiceMode === 'puzzle' ? new Chess(practicePuzzle.fen) : new Chess();
-    practiceSelectedSquare = null;
-    practiceLegalTargets = [];
-    elements.sectionContent.innerHTML = practiceMarkup();
-    bindPracticeActions();
-  }));
   elements.sectionContent.querySelectorAll('[data-practice-square]').forEach((square) => square.addEventListener('click', () => handlePracticeSquare(square.dataset.practiceSquare)));
-  document.querySelector('#practice-hint')?.addEventListener('click', () => { const status = document.querySelector('#practice-status'); if (status) status.textContent = practiceMode === 'puzzle' ? practicePuzzle.hint : 'The rat evaluates material, checks, and captures locally.'; });
-  document.querySelector('#practice-reset')?.addEventListener('click', () => { practiceGame = practiceMode === 'puzzle' ? new Chess(practicePuzzle.fen) : new Chess(); practiceSelectedSquare = null; practiceLegalTargets = []; elements.sectionContent.innerHTML = practiceMarkup(); bindPracticeActions(); });
+  document.querySelector('#practice-reset')?.addEventListener('click', () => { practiceGame = new Chess(); practiceSelectedSquare = null; practiceLegalTargets = []; elements.sectionContent.innerHTML = practiceMarkup(); bindPracticeActions(); });
 }
 
 function handlePracticeSquare(square) {
@@ -898,12 +933,8 @@ function handlePracticeSquare(square) {
     const move = practiceGame.move({ from, to: square, promotion: 'q' });
     practiceSelectedSquare = null;
     practiceLegalTargets = [];
-    if (move && practiceMode === 'puzzle') {
-      const status = document.querySelector('#practice-status');
-      if (from === practicePuzzle.from && square === practicePuzzle.to) { practiceProgress += 1; localStorage.setItem('chesse-practice-solved', String(practiceProgress)); if (status) status.textContent = 'Excellent. Puzzle solved.'; } else if (status) status.textContent = 'Legal move, but try to find the forcing check.';
-    }
     if (move && practiceMode === 'bot') window.setTimeout(makeLocalRatMove, 280);
-    elements.sectionContent.querySelector('.practice-board').innerHTML = boardMarkup(practiceGame, 'white', true);
+    elements.sectionContent.innerHTML = practiceMarkup();
     bindPracticeActions();
     return;
   }
@@ -911,6 +942,8 @@ function handlePracticeSquare(square) {
   if (piece && piece.color === practiceGame.turn()) {
     practiceSelectedSquare = square;
     practiceLegalTargets = practiceGame.moves({ square, verbose: true }).map((move) => move.to);
+    elements.sectionContent.innerHTML = practiceMarkup();
+    bindPracticeActions();
   }
 }
 
