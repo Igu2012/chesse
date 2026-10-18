@@ -174,10 +174,12 @@ input:focus { border-color: var(--yellow); }
 .rat-layer { position: absolute; z-index: 3; pointer-events: none; }
 .rat-image-layer { object-fit: contain; object-position: center; }
 .rat-image-shirt { z-index: 4; right: 2%; bottom: 0; width: 96%; height: 65%; object-position: center bottom; }
+.rat-image-item-dress { height: 86%; }
 .rat-image-pants { z-index: 3; right: 7%; bottom: 0; width: 86%; height: 48%; object-position: center bottom; }
 .rat-image-hair, .rat-image-hat { z-index: 4; top: -2%; left: 4%; width: 92%; height: 58%; object-position: center top; }
 .rat-image-beard { z-index: 4; top: 25%; left: 7%; width: 86%; height: 52%; }
 .rat-image-accessory { z-index: 5; top: 18%; left: 2%; width: 96%; height: 66%; }
+.rat-image-item-bow { z-index: 6; top: -3%; left: 8%; width: 84%; height: 52%; object-position: center top; }
 .rat-shirt-layer { right: 17%; bottom: 1%; left: 17%; height: 34%; border-radius: 48% 48% 12% 12%; opacity: 0; font-size: 2.1rem; font-weight: 900; text-align: center; }
 .rat-stage-avatar .rat-shirt-layer { right: 12%; bottom: -4%; left: 12%; height: 39%; font-size: 1.1rem; }
 .shirt-gold { opacity: .96; background: #e7b331; } .shirt-palmeiras { opacity: .98; color: #fff; background: linear-gradient(90deg, #08783e 0 42%, #fff 43% 56%, #08783e 57%); } .shirt-hoodie { opacity: .96; background: #6c4a80; border-radius: 35% 35% 12% 12%; } .shirt-checker { opacity: .96; background: repeating-conic-gradient(#efcf6a 0 25%, #473d38 0 50%) 50% / 22px 22px; } .shirt-tuxedo { opacity: .98; background: #17191e; } .shirt-tuxedo::after { content: '◆'; color: #f0c94d; font-size: .75rem; }

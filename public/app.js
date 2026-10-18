@@ -88,6 +88,11 @@ const ratItemAssets = {
   shorts: '/manus-storage/async-images/kGhBqfvcJAh7RAM2aFAcg8/image-3.webp',
   goatee: '/manus-storage/async-images/kGhBqfvcJAh7RAM2aFAcg8/image-4.webp',
   mustache: '/manus-storage/async-images/kGhBqfvcJAh7RAM2aFAcg8/image-5.webp',
+  bob: '/manus-storage/async-images/j0sSSxoqDcMpQlQGRbBvYa/image-1.webp',
+  ponytail: '/manus-storage/async-images/j0sSSxoqDcMpQlQGRbBvYa/image-2.webp',
+  sweater: '/manus-storage/async-images/j0sSSxoqDcMpQlQGRbBvYa/image-3.webp',
+  dress: '/manus-storage/async-images/j0sSSxoqDcMpQlQGRbBvYa/image-4.webp',
+  bow: '/manus-storage/async-images/j0sSSxoqDcMpQlQGRbBvYa/image-5.webp',
 };
 
 const translations = {
@@ -173,7 +178,7 @@ function ratCharacterMarkup(rat = {}, mode = 'full') {
     hair: rat.hair || 'none', shirt: rat.shirt || 'none', pants: rat.pants || 'none',
     beard: rat.beard || 'none', accessory: rat.accessory || 'none',
   };
-  const item = (name, value, extraClass = '') => ratItemAssets[value] ? `<img class="rat-layer rat-image-layer rat-image-${name} ${extraClass}" src="${ratItemAssets[value]}" alt="" aria-hidden="true">` : '';
+  const item = (name, value, extraClass = '') => ratItemAssets[value] ? `<img class="rat-layer rat-image-layer rat-image-${name} rat-image-item-${value} ${extraClass}" src="${ratItemAssets[value]}" alt="" aria-hidden="true">` : '';
   return `<span class="rat-stage rat-stage-${mode} rat-bg-${safe.background} rat-fur-${safe.color}">
     <img src="${mode === 'avatar' ? ratAssets.avatar : ratAssets.full}" alt="Chesse rat character" class="rat-base">
     ${item('shirt', safe.shirt)}${item('pants', safe.pants)}${item('hair', safe.hair)}${item('hat', safe.hat)}${item('beard', safe.beard)}${item('accessory', safe.accessory)}
@@ -700,11 +705,11 @@ function profileSectionMarkup(profile, history) {
   const groups = [
     ['background', 'Background', '▦', 'Profile background', [['night','Night',''],['arena','Arena',''],['forest','Forest',''],['ocean','Ocean',''],['sunset','Sunset',''],['paper','Paper','']]],
     ['hat', 'Hats', '⌂', 'Hats and headwear', [['none','Natural',''],['cap-blue','Blue cap',''],['cap-green','Green cap',''],['beanie','Beanie',''],['crown','Crown','']]],
-    ['hair', 'Hair', '⌁', 'Hair', [['none','Clean',''],['cebolinha','Cebolinha',''],['tuft','Tiny tuft',''],['mohawk','Mohawk',''],['curly','Curly','']]],
-    ['shirt', 'Shirts', '◇', 'Shirts', [['none','No shirt',''],['gold','Gold tee',''],['palmeiras','Palmeiras','P'],['hoodie','Hoodie',''],['checker','Checker',''],['tuxedo','Tuxedo','']]],
+    ['hair', 'Hair', '⌁', 'Hair', [['none','Clean',''],['cebolinha','Cebolinha',''],['tuft','Tiny tuft',''],['mohawk','Mohawk',''],['curly','Curly',''],['bob','Bob',''],['ponytail','Ponytail','']]],
+    ['shirt', 'Shirts', '◇', 'Shirts', [['none','No shirt',''],['gold','Gold tee',''],['palmeiras','Palmeiras','P'],['hoodie','Hoodie',''],['checker','Checker',''],['tuxedo','Tuxedo',''],['sweater','Sweater',''],['dress','Dress','']]],
     ['pants', 'Pants', '▥', 'Pants', [['none','Natural',''],['denim','Denim',''],['black','Black',''],['shorts','Shorts',''],['track','Track pants','']]],
     ['beard', 'Beards', '⌣', 'Beards', [['none','Clean',''],['goatee','Goatee',''],['mustache','Mustache',''],['full','Full beard',''],['royal','Royal beard','']]],
-    ['accessory', 'Extras', '✦', 'Extras', [['none','None',''],['glasses','Glasses','◉'],['star-earring','Star earring','✦'],['headphones','Headphones','◒']]],
+    ['accessory', 'Extras', '✦', 'Extras', [['none','None',''],['glasses','Glasses','◉'],['star-earring','Star earring','✦'],['headphones','Headphones','◒'],['bow','Bow','']]],
   ];
   const options = (name, title, values) => `<fieldset class="customizer-group"><legend>${title}</legend><div class="customizer-options">${values.map(([value, label, icon]) => `<button type="button" class="customizer-option ${rat[name] === value ? 'selected' : ''}" data-rat-choice="${name}" data-rat-value="${value}" aria-label="${label}" title="${label}"><span class="option-art option-${value}">${ratItemAssets[value] ? `<img src="${ratItemAssets[value]}" alt="" aria-hidden="true">` : icon || ''}</span></button>`).join('')}</div></fieldset>`;
   const customizer = `<div class="customizer-tabs" role="tablist">${groups.map(([name, label, icon]) => `<button type="button" class="customizer-tab ${customizerCategory === name ? 'active' : ''}" data-customizer-tab="${name}" role="tab"><span>${icon}</span><small>${label}</small></button>`).join('')}</div><div class="customizer-panels">${groups.map(([name, , , title, values]) => `<div class="customizer-panel ${customizerCategory === name ? 'active' : ''}" data-customizer-panel="${name}">${options(name, title, values)}</div>`).join('')}</div>${groups.map(([name]) => `<input type="hidden" name="${name}" value="${rat[name] || 'none'}">`).join('')}`;
