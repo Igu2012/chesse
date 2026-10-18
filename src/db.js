@@ -58,10 +58,23 @@ function ensureMultiplayerSchema() {
         bio VARCHAR(280) NOT NULL DEFAULT '',
         locale VARCHAR(10) NOT NULL DEFAULT 'auto',
         rat_color VARCHAR(20) NOT NULL DEFAULT 'gold',
-        rat_accessory VARCHAR(20) NOT NULL DEFAULT 'pawn',
+        rat_accessory VARCHAR(20) NOT NULL DEFAULT 'none',
         rat_avatar_mode VARCHAR(20) NOT NULL DEFAULT 'both',
+        rat_background VARCHAR(20) NOT NULL DEFAULT 'night',
+        rat_hat VARCHAR(20) NOT NULL DEFAULT 'none',
+        rat_hair VARCHAR(20) NOT NULL DEFAULT 'none',
+        rat_shirt VARCHAR(20) NOT NULL DEFAULT 'none',
+        rat_pants VARCHAR(20) NOT NULL DEFAULT 'none',
+        rat_beard VARCHAR(20) NOT NULL DEFAULT 'none',
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
       );
+
+      ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS rat_background VARCHAR(20) NOT NULL DEFAULT 'night';
+      ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS rat_hat VARCHAR(20) NOT NULL DEFAULT 'none';
+      ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS rat_hair VARCHAR(20) NOT NULL DEFAULT 'none';
+      ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS rat_shirt VARCHAR(20) NOT NULL DEFAULT 'none';
+      ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS rat_pants VARCHAR(20) NOT NULL DEFAULT 'none';
+      ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS rat_beard VARCHAR(20) NOT NULL DEFAULT 'none';
 
       CREATE INDEX IF NOT EXISTS chess_games_white_user_idx ON chess_games (white_user_id, status);
       CREATE INDEX IF NOT EXISTS chess_games_black_user_idx ON chess_games (black_user_id, status);

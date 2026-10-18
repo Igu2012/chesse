@@ -5,5 +5,4 @@
   <circle cx="127" cy="139" r="15" fill="#2b211d"/><circle cx="193" cy="139" r="15" fill="#2b211d"/><circle cx="123" cy="135" r="5" fill="#fff"/><circle cx="189" cy="135" r="5" fill="#fff"/>
   <ellipse cx="160" cy="178" rx="28" ry="21" fill="#67352c"/><path d="M160 188 C149 205 131 203 121 190 M160 188 C171 205 189 203 199 190" fill="none" stroke="#67352c" stroke-width="7" stroke-linecap="round"/>
   <path d="M72 178 L24 167 M72 196 L22 207 M248 178 L296 167 M248 196 L298 207" stroke="#6f3d25" stroke-width="5" stroke-linecap="round"/>
-  <circle cx="160" cy="47" r="26" fill="#f0b90b" stroke="#6f3d25" stroke-width="7"/><path d="M145 73 H175 M140 84 H180" stroke="#f0b90b" stroke-width="10" stroke-linecap="round"/>
 </svg>

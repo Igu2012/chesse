@@ -15,5 +15,4 @@
   <path d="M73 153 L28 143 M72 169 L24 177 M249 153 L294 143 M250 169 L298 177" stroke="#6f3d25" stroke-width="4" stroke-linecap="round"/>
   <ellipse cx="91" cy="349" rx="38" ry="20" fill="#c77c48" stroke="#6f3d25" stroke-width="6"/><ellipse cx="231" cy="349" rx="38" ry="20" fill="#c77c48" stroke="#6f3d25" stroke-width="6"/>
   <path d="M123 255 Q161 276 199 255" fill="none" stroke="#b8753e" stroke-width="6" stroke-linecap="round"/>
-  <circle cx="161" cy="55" r="24" fill="#f0b90b" stroke="#6f3d25" stroke-width="6"/><path d="M147 79 H175 M142 89 H180" stroke="#f0b90b" stroke-width="9" stroke-linecap="round"/>
 </svg>

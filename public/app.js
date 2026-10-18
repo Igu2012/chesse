@@ -145,7 +145,24 @@ function ratFilter(color) {
 }
 
 function ratAccessoryMark(accessory) {
-  return { pawn: '♟', crown: '♛', glasses: '◉', none: '' }[accessory] || '';
+  return { glasses: '◉', 'star-earring': '✦', headphones: '◒', none: '' }[accessory] || '';
+}
+
+function ratCharacterMarkup(rat = {}, mode = 'full') {
+  const safe = {
+    color: rat.color || 'gold', background: rat.background || 'night', hat: rat.hat || 'none',
+    hair: rat.hair || 'none', shirt: rat.shirt || 'none', pants: rat.pants || 'none',
+    beard: rat.beard || 'none', accessory: rat.accessory || 'none',
+  };
+  return `<span class="rat-stage rat-stage-${mode} rat-bg-${safe.background} rat-fur-${safe.color}">
+    <img src="${mode === 'avatar' ? ratAssets.avatar : ratAssets.full}" alt="Chesse rat character" class="rat-base">
+    <span class="rat-layer rat-shirt-layer shirt-${safe.shirt}">${safe.shirt === 'palmeiras' ? 'P' : ''}</span>
+    <span class="rat-layer rat-pants-layer pants-${safe.pants}"></span>
+    <span class="rat-layer rat-hair-layer hair-${safe.hair}"></span>
+    <span class="rat-layer rat-hat-layer hat-${safe.hat}"></span>
+    <span class="rat-layer rat-beard-layer beard-${safe.beard}"></span>
+    <span class="rat-layer rat-accessory-layer accessory-${safe.accessory}">${ratAccessoryMark(safe.accessory)}</span>
+  </span>`;
 }
 
 function applyProfile(user) {
@@ -161,7 +178,7 @@ function applyProfile(user) {
   const showRatAvatar = ['avatar', 'both'].includes(user.rat?.avatarMode);
   [elements.profileAvatar, elements.topbarAvatar, elements.boardAvatar].forEach((avatar) => {
     if (!avatar) return;
-    avatar.innerHTML = showRatAvatar ? `<img class="rat-avatar" src="${ratAssets.avatar}" alt="Chesse rat avatar" style="filter:${ratFilter(user.rat?.color)}"><span class="rat-accessory-badge">${ratAccessoryMark(user.rat?.accessory)}</span>` : initial;
+    avatar.innerHTML = showRatAvatar ? ratCharacterMarkup(user.rat, 'avatar') : initial;
     avatar.classList.toggle('has-rat-avatar', showRatAvatar);
   });
   const requestedLocale = localStorage.getItem('chesse-locale') || user.locale || 'auto';
@@ -405,7 +422,7 @@ async function changeLocale(event) {
     await api('/api/profile', { method: 'PATCH', body: JSON.stringify({
       displayName: currentProfile.display_name || currentProfile.displayName || '',
       bio: currentProfile.bio || '', locale: selected,
-      rat: currentProfile.rat || { color: 'gold', accessory: 'pawn', avatarMode: 'both' },
+      rat: currentProfile.rat || { color: 'gold', accessory: 'none', avatarMode: 'both', background: 'night', hat: 'none', hair: 'none', shirt: 'none', pants: 'none', beard: 'none' },
     }) });
   } catch (error) {
     console.warn('Language preference could not be saved:', error.message);
@@ -661,11 +678,14 @@ bootstrap();
 
 
 function profileSectionMarkup(profile, history) {
-  const rat = profile.rat || { color: 'gold', accessory: 'pawn', avatarMode: 'both' };
+  const rat = { color: 'gold', accessory: 'none', avatarMode: 'both', background: 'night', hat: 'none', hair: 'none', shirt: 'none', pants: 'none', beard: 'none', ...(profile.rat || {}) };
+  if (rat.accessory === 'pawn') rat.accessory = 'none';
   const historyMarkup = history.length ? history.map((game) => `<button class="history-row" type="button" data-history-game="${game.id}"><span><strong>${escapeHtml(game.opponentDisplayName)}</strong><small>${escapeHtml(game.opponentUsername)} · ${game.moveCount} moves</small></span><b class="history-${game.outcome}">${t(game.outcome)}</b><time>${new Date(game.completedAt).toLocaleDateString()}</time></button>`).join('') : `<p class="empty-state">${t('noHistory')}</p>`;
+  const options = (name, title, values) => `<fieldset class="customizer-group"><legend>${title}</legend><div class="customizer-options">${values.map(([value, label, icon]) => `<button type="button" class="customizer-option ${rat[name] === value ? 'selected' : ''}" data-rat-choice="${name}" data-rat-value="${value}"><span class="option-art option-${value}">${icon || ''}</span><small>${label}</small></button>`).join('')}</div><input type="hidden" name="${name}" value="${rat[name] || values[0][0]}"></fieldset>`;
+  const customizer = `${options('background', 'Profile background', [['night','Night',''],['arena','Arena',''],['forest','Forest',''],['ocean','Ocean',''],['sunset','Sunset',''],['paper','Paper','']])}${options('hat', 'Hats and headwear', [['none','Natural',''],['cap-blue','Blue cap',''],['cap-green','Green cap',''],['beanie','Beanie',''],['crown','Crown','']])}${options('hair', 'Hair', [['none','Clean',''],['cebolinha','Cebolinha',''],['tuft','Tiny tuft',''],['mohawk','Mohawk',''],['curly','Curly','']])}${options('shirt', 'Shirts', [['none','No shirt',''],['gold','Gold tee',''],['palmeiras','Palmeiras','P'],['hoodie','Hoodie',''],['checker','Checker',''],['tuxedo','Tuxedo','']])}${options('pants', 'Pants', [['none','Natural',''],['denim','Denim',''],['black','Black',''],['shorts','Shorts',''],['track','Track pants','']])}${options('beard', 'Beards', [['none','Clean',''],['goatee','Goatee',''],['mustache','Mustache',''],['full','Full beard',''],['royal','Royal beard','']])}${options('accessory', 'Extras', [['none','None',''],['glasses','Glasses','◉'],['star-earring','Star earring','✦'],['headphones','Headphones','◒']])}`;
   return `<div class="profile-layout">
-    <div class="feature-card profile-card"><div class="profile-character">${rat.avatarMode !== 'avatar' ? `<div class="rat-full-wrap"><img class="rat-full" src="${ratAssets.full}" alt="Chesse rat character" style="filter:${ratFilter(rat.color)}"><span class="rat-character-accessory">${ratAccessoryMark(rat.accessory)}</span></div>` : ''}<div><span class="feature-kicker">${t('profile')}</span><h2>${escapeHtml(profile.displayName)}</h2><p>${escapeHtml(profile.bio || 'Your chess story starts here.')}</p></div></div>
-      <form id="profile-form" class="profile-form"><label>${t('displayName')}<input name="displayName" maxlength="40" value="${escapeHtml(profile.displayName)}"></label><label>${t('bio')}<textarea name="bio" maxlength="280" rows="3">${escapeHtml(profile.bio)}</textarea></label><div class="form-grid"><label>${t('ratColor')}<select name="ratColor"><option value="gold">${t('gold')}</option><option value="brown">${t('brown')}</option><option value="gray">${t('gray')}</option><option value="pink">${t('pink')}</option><option value="blue">${t('blue')}</option></select></label><label>${t('accessory')}<select name="ratAccessory"><option value="pawn">${t('pawn')}</option><option value="crown">${t('crown')}</option><option value="glasses">${t('glasses')}</option><option value="none">${t('none')}</option></select></label></div><label>${t('avatarMode')}<select name="ratAvatarMode"><option value="avatar">${t('avatar')}</option><option value="full">${t('full')}</option><option value="both">${t('both')}</option></select></label><button class="button button-primary" type="submit">${t('save')} <span>↗</span></button><p class="form-message" id="profile-message" role="status"></p></form>
+    <div class="feature-card profile-card"><div class="profile-character">${rat.avatarMode !== 'avatar' ? `<div class="rat-full-wrap">${ratCharacterMarkup(rat, 'full')}</div>` : ''}<div><span class="feature-kicker">${t('profile')}</span><h2>${escapeHtml(profile.displayName)}</h2><p>${escapeHtml(profile.bio || 'Your chess story starts here.')}</p></div></div>
+      <form id="profile-form" class="profile-form"><label>${t('displayName')}<input name="displayName" maxlength="40" value="${escapeHtml(profile.displayName)}"></label><label>${t('bio')}<textarea name="bio" maxlength="280" rows="3">${escapeHtml(profile.bio)}</textarea></label><div class="form-grid"><label>${t('ratColor')}<select name="ratColor"><option value="gold">${t('gold')}</option><option value="brown">${t('brown')}</option><option value="gray">${t('gray')}</option><option value="pink">${t('pink')}</option><option value="blue">${t('blue')}</option></select></label><label>${t('avatarMode')}<select name="ratAvatarMode"><option value="avatar">${t('avatar')}</option><option value="full">${t('full')}</option><option value="both">${t('both')}</option></select></label></div><div class="customizer"><div class="customizer-title"><span class="feature-kicker">CHARACTER STUDIO</span><strong>Build your rat</strong><small>Mix pieces to make your own chess desk mascot.</small></div>${customizer}</div><button class="button button-primary" type="submit">${t('save')} <span>↗</span></button><p class="form-message" id="profile-message" role="status"></p></form>
     </div>
     <div class="feature-card history-card"><div class="panel-heading"><div><span class="feature-kicker">${t('history')}</span><h2>${t('history')}</h2></div></div><div class="history-list">${historyMarkup}</div><div id="history-detail"></div></div>
   </div>`;
@@ -681,8 +701,12 @@ async function renderCommunitySection() {
     const form = document.querySelector('#profile-form');
     const colorSelect = form.elements.ratColor;
     colorSelect.value = profile.rat.color;
-    form.elements.ratAccessory.value = profile.rat.accessory;
     form.elements.ratAvatarMode.value = profile.rat.avatarMode;
+    form.querySelectorAll('[data-rat-choice]').forEach((button) => button.addEventListener('click', () => {
+      const group = button.dataset.ratChoice;
+      form.elements[group].value = button.dataset.ratValue;
+      form.querySelectorAll(`[data-rat-choice="${group}"]`).forEach((item) => item.classList.toggle('selected', item === button));
+    }));
     form.addEventListener('submit', saveProfile);
     elements.sectionContent.querySelectorAll('[data-history-game]').forEach((button) => button.addEventListener('click', () => loadHistoryDetail(button.dataset.historyGame)));
   } catch (error) {
@@ -697,7 +721,12 @@ async function saveProfile(event) {
     displayName: form.elements.displayName.value,
     bio: form.elements.bio.value,
     locale: elements.languageSelect?.value || currentLocale,
-    rat: { color: form.elements.ratColor.value, accessory: form.elements.ratAccessory.value, avatarMode: form.elements.ratAvatarMode.value },
+    rat: {
+      color: form.elements.ratColor.value, avatarMode: form.elements.ratAvatarMode.value,
+      accessory: form.elements.accessory.value, background: form.elements.background.value,
+      hat: form.elements.hat.value, hair: form.elements.hair.value, shirt: form.elements.shirt.value,
+      pants: form.elements.pants.value, beard: form.elements.beard.value,
+    },
   }) });
   currentProfile = { ...(currentProfile || {}), ...payload.profile };
   const session = await api('/api/auth/me');

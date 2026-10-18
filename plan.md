@@ -27,6 +27,7 @@ Chesse is a public-repository web chess application with a Node.js/Express backe
 - `public/styles.css`: responsive visual system for the chess dashboard.
 - `public/assets/chesspieces/wikipedia/`: local board piece images sourced from the supplied reference board.
 - `public/assets/rat/`: local transparent SVG assets for the chubby rat full character and avatar.
+- The profile character studio renders the rat as a clean base plus selectable visual layers for background, headwear, hair, shirts, pants, beards, and small accessories.
 - `public/manus-routes.json`: route manifest for the managed preview.
 - `render.yaml`: Render Blueprint for a Node web service and runtime environment variables.
 - `Dockerfile`: portable production container definition.

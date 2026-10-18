@@ -5,8 +5,14 @@ const { requireAuth } = require('../middleware/auth');
 const router = express.Router();
 const LOCALES = new Set(['auto', 'en', 'pt-BR', 'es', 'fr', 'de']);
 const RAT_COLORS = new Set(['gold', 'brown', 'gray', 'pink', 'blue']);
-const RAT_ACCESSORIES = new Set(['pawn', 'crown', 'glasses', 'none']);
+const RAT_ACCESSORIES = new Set(['none', 'glasses', 'star-earring', 'headphones']);
 const RAT_MODES = new Set(['avatar', 'full', 'both']);
+const RAT_BACKGROUNDS = new Set(['night', 'arena', 'forest', 'ocean', 'sunset', 'paper']);
+const RAT_HATS = new Set(['none', 'cap-blue', 'cap-green', 'beanie', 'crown']);
+const RAT_HAIR = new Set(['none', 'cebolinha', 'tuft', 'mohawk', 'curly']);
+const RAT_SHIRTS = new Set(['none', 'gold', 'palmeiras', 'hoodie', 'checker', 'tuxedo']);
+const RAT_PANTS = new Set(['none', 'denim', 'black', 'shorts', 'track']);
+const RAT_BEARDS = new Set(['none', 'goatee', 'mustache', 'full', 'royal']);
 
 async function prepareSchema() {
   await db.ensureMultiplayerSchema();
@@ -23,8 +29,14 @@ function toProfile(row) {
     locale: row.locale || 'auto',
     rat: {
       color: row.rat_color || 'gold',
-      accessory: row.rat_accessory || 'pawn',
+      accessory: row.rat_accessory === 'pawn' ? 'none' : (row.rat_accessory || 'none'),
       avatarMode: row.rat_avatar_mode || 'both',
+      background: row.rat_background || 'night',
+      hat: row.rat_hat || 'none',
+      hair: row.rat_hair || 'none',
+      shirt: row.rat_shirt || 'none',
+      pants: row.rat_pants || 'none',
+      beard: row.rat_beard || 'none',
     },
   };
 }
@@ -34,7 +46,8 @@ router.get('/', requireAuth, async (request, response) => {
     await prepareSchema();
     const result = await db.query(
       `SELECT u.username, up.display_name, up.bio, up.locale, up.rat_color,
-              up.rat_accessory, up.rat_avatar_mode,
+              up.rat_accessory, up.rat_avatar_mode, up.rat_background, up.rat_hat,
+              up.rat_hair, up.rat_shirt, up.rat_pants, up.rat_beard,
               COALESCE(ps.wins, 0) AS wins, COALESCE(ps.losses, 0) AS losses,
               COALESCE(ps.draws, 0) AS draws, COALESCE(ps.current_rating, 1200) AS current_rating
        FROM users u
@@ -61,28 +74,41 @@ router.patch('/', requireAuth, async (request, response) => {
   const locale = stringValue(body.locale, 'auto');
   const rat = body.rat || {};
   const color = stringValue(rat.color, 'gold');
-  const accessory = stringValue(rat.accessory, 'pawn');
+  const accessory = stringValue(rat.accessory, 'none');
   const avatarMode = stringValue(rat.avatarMode, 'both');
+  const background = stringValue(rat.background, 'night');
+  const hat = stringValue(rat.hat, 'none');
+  const hair = stringValue(rat.hair, 'none');
+  const shirt = stringValue(rat.shirt, 'none');
+  const pants = stringValue(rat.pants, 'none');
+  const beard = stringValue(rat.beard, 'none');
 
   if (displayName.length > 40 || bio.length > 280) {
     return response.status(400).json({ error: 'Display name must be at most 40 characters and bio at most 280 characters.' });
   }
-  if (!LOCALES.has(locale) || !RAT_COLORS.has(color) || !RAT_ACCESSORIES.has(accessory) || !RAT_MODES.has(avatarMode)) {
+  if (!LOCALES.has(locale) || !RAT_COLORS.has(color) || !RAT_ACCESSORIES.has(accessory) || !RAT_MODES.has(avatarMode)
+    || !RAT_BACKGROUNDS.has(background) || !RAT_HATS.has(hat) || !RAT_HAIR.has(hair)
+    || !RAT_SHIRTS.has(shirt) || !RAT_PANTS.has(pants) || !RAT_BEARDS.has(beard)) {
     return response.status(400).json({ error: 'One of the profile customization values is not supported.' });
   }
 
   try {
     await prepareSchema();
     const result = await db.query(
-      `INSERT INTO user_profiles (user_id, display_name, bio, locale, rat_color, rat_accessory, rat_avatar_mode)
-       VALUES ($1, NULLIF($2, ''), $3, $4, $5, $6, $7)
+      `INSERT INTO user_profiles (user_id, display_name, bio, locale, rat_color, rat_accessory, rat_avatar_mode,
+                                  rat_background, rat_hat, rat_hair, rat_shirt, rat_pants, rat_beard)
+       VALUES ($1, NULLIF($2, ''), $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
        ON CONFLICT (user_id) DO UPDATE SET
          display_name = NULLIF(EXCLUDED.display_name, ''), bio = EXCLUDED.bio,
          locale = EXCLUDED.locale, rat_color = EXCLUDED.rat_color,
          rat_accessory = EXCLUDED.rat_accessory, rat_avatar_mode = EXCLUDED.rat_avatar_mode,
+         rat_background = EXCLUDED.rat_background, rat_hat = EXCLUDED.rat_hat,
+         rat_hair = EXCLUDED.rat_hair, rat_shirt = EXCLUDED.rat_shirt,
+         rat_pants = EXCLUDED.rat_pants, rat_beard = EXCLUDED.rat_beard,
          updated_at = NOW()
-       RETURNING display_name, bio, locale, rat_color, rat_accessory, rat_avatar_mode`,
-      [request.user.sub, displayName, bio, locale, color, accessory, avatarMode],
+       RETURNING display_name, bio, locale, rat_color, rat_accessory, rat_avatar_mode,
+                 rat_background, rat_hat, rat_hair, rat_shirt, rat_pants, rat_beard`,
+      [request.user.sub, displayName, bio, locale, color, accessory, avatarMode, background, hat, hair, shirt, pants, beard],
     );
     return response.json({ profile: toProfile({ ...result.rows[0], username: request.user.username }) });
   } catch (error) {

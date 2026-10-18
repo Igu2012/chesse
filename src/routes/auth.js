@@ -126,7 +126,8 @@ router.get('/me', requireAuth, async (request, response) => {
               COALESCE(ps.draws, 0) AS draws,
               COALESCE(ps.current_rating, 1200) AS current_rating,
               up.display_name, up.bio, up.locale, up.rat_color,
-              up.rat_accessory, up.rat_avatar_mode
+              up.rat_accessory, up.rat_avatar_mode, up.rat_background, up.rat_hat,
+              up.rat_hair, up.rat_shirt, up.rat_pants, up.rat_beard
        FROM users u
        LEFT JOIN player_stats ps ON ps.user_id = u.id
        LEFT JOIN user_profiles up ON up.user_id = u.id
@@ -150,8 +151,14 @@ router.get('/me', requireAuth, async (request, response) => {
         locale: row.locale || 'auto',
         rat: {
           color: row.rat_color || 'gold',
-          accessory: row.rat_accessory || 'pawn',
+          accessory: row.rat_accessory === 'pawn' ? 'none' : (row.rat_accessory || 'none'),
           avatarMode: row.rat_avatar_mode || 'both',
+          background: row.rat_background || 'night',
+          hat: row.rat_hat || 'none',
+          hair: row.rat_hair || 'none',
+          shirt: row.rat_shirt || 'none',
+          pants: row.rat_pants || 'none',
+          beard: row.rat_beard || 'none',
         },
       },
       stats: {

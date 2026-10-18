@@ -21,6 +21,7 @@ Chesse is a compact web chess dashboard inspired by modern online chess platform
 - A full game-history view with saved final positions and move lists.
 - Automatic language detection with English, Portuguese, Spanish, French, and German translations plus a language override.
 - Original transparent chubby rat mascot SVG assets for profiles and avatars.
+- Duolingo-inspired character studio with layered backgrounds, hats, hair, shirts, pants, beards, glasses, earrings, and headphones.
 - Render Blueprint and production Dockerfile.
 - No environment files or credentials are committed.
 
@@ -35,7 +36,7 @@ The server does not alter these existing tables. It creates a zeroed `player_sta
 
 On the first authenticated profile, matchmaking, or game request, the server idempotently creates these additional application tables if they do not exist: `matchmaking_queue`, `chess_games`, `chess_game_moves`, and `user_profiles`. The Neon role used by `DATABASE_URL` must be allowed to create tables in the selected database.
 
-`user_profiles` stores display name, bio, locale, rat color, rat accessory, and avatar mode. It is keyed by `user_id` and does not change the existing `users` or `player_stats` tables.
+`user_profiles` stores display name, bio, locale, rat color, accessory, avatar mode, background, hat, hair, shirt, pants, and beard. It is keyed by `user_id` and does not change the existing `users` or `player_stats` tables. Existing profiles are migrated from the retired pawn-head accessory to the clean rat design automatically.
 
 ## Local setup
 

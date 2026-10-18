@@ -93,3 +93,14 @@
 - [x] Portuguese, English, Spanish, French, and German translations cover authentication, navigation, play, practice, profile, watching, history, and game-state messages.
 - [x] Users can override the detected language and the preference persists locally.
 - [x] Missing translations fall back to English without breaking the interface.
+
+## 16. Deliver the layered rat character studio
+
+- [x] Remove the yellow chess symbol from the rat's head.
+- [x] Replace the single accessory selector with a Duolingo-style visual customization studio.
+- [x] Provide selectable profile backgrounds: Night, Arena, Forest, Ocean, Sunset, and Paper.
+- [x] Provide selectable headwear: natural, blue cap, green cap, beanie, and crown.
+- [x] Provide selectable hair: clean, Cebolinha-inspired swoop, tuft, mohawk, and curly hair.
+- [x] Provide selectable shirts including a Palmeiras-inspired green-and-white shirt, gold tee, hoodie, checker shirt, and tuxedo.
+- [x] Provide selectable pants, beards, glasses, earrings, and headphones.
+- [x] Persist all character layers in Neon and render them on the profile and compact avatar.
