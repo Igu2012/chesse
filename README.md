@@ -14,6 +14,13 @@ Chesse is a compact web chess dashboard inspired by modern online chess platform
 - Server-side move validation, turn ownership, resign, draw, and automatic game completion.
 - Automatic win, loss, and draw persistence after a completed game.
 - Dashboard with the current board, profile, rating, and recorded statistics.
+- Local tactical problems with hints and browser-local progress.
+- Browser-local practice against a deterministic material-aware chess opponent; practice moves never reach the backend.
+- Public read-only watching for active multiplayer games.
+- Editable display name, bio, locale, rat color, rat accessory, and avatar mode.
+- A full game-history view with saved final positions and move lists.
+- Automatic language detection with English, Portuguese, Spanish, French, and German translations plus a language override.
+- Original transparent chubby rat mascot assets for profiles and avatars.
 - Render Blueprint and production Dockerfile.
 - No environment files or credentials are committed.
 
@@ -26,7 +33,9 @@ The application expects these existing PostgreSQL tables:
 
 The server does not alter these existing tables. It creates a zeroed `player_stats` row for a newly registered user when one does not already exist.
 
-On the first matchmaking or game request, the server idempotently creates these additional application tables if they do not exist: `matchmaking_queue`, `chess_games`, and `chess_game_moves`. The Neon role used by `DATABASE_URL` must be allowed to create tables in the selected database.
+On the first authenticated profile, matchmaking, or game request, the server idempotently creates these additional application tables if they do not exist: `matchmaking_queue`, `chess_games`, `chess_game_moves`, and `user_profiles`. The Neon role used by `DATABASE_URL` must be allowed to create tables in the selected database.
+
+`user_profiles` stores display name, bio, locale, rat color, rat accessory, and avatar mode. It is keyed by `user_id` and does not change the existing `users` or `player_stats` tables.
 
 ## Local setup
 
@@ -106,6 +115,12 @@ Do not paste credentials into `render.yaml`, source files, README files, or Git 
 - `GET /api/multiplayer/games/:gameId` — return the current server-authoritative game state and move list.
 - `POST /api/multiplayer/games/:gameId/moves` — validate and submit one legal move for the authenticated player.
 - `POST /api/multiplayer/games/:gameId/finish` — resign or record a draw for a participating player.
+- `GET /api/profile` — return the authenticated profile, rat customization, and stats.
+- `PATCH /api/profile` — update display name, bio, locale, and rat customization.
+- `GET /api/profile/history` — return completed games for the authenticated player.
+- `GET /api/profile/history/:gameId` — return one completed game and its saved move list.
+- `GET /api/watch/games` — list active public games for spectators.
+- `GET /api/watch/games/:gameId` — return an active read-only public game state.
 
 ## Security notes
 

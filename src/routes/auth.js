@@ -34,6 +34,16 @@ async function ensureStatsRow(userId) {
   );
 }
 
+async function ensureProfileRow(userId) {
+  await db.ensureMultiplayerSchema();
+  await db.query(
+    `INSERT INTO user_profiles (user_id)
+     VALUES ($1)
+     ON CONFLICT (user_id) DO NOTHING`,
+    [userId],
+  );
+}
+
 router.post('/signup', async (request, response) => {
   const credentials = validateCredentials(request.body || {});
 
@@ -52,6 +62,7 @@ router.post('/signup', async (request, response) => {
     const user = result.rows[0];
 
     await ensureStatsRow(user.id);
+    await ensureProfileRow(user.id);
     setSessionCookie(response, user);
     return response.status(201).json({ user });
   } catch (error) {
@@ -96,6 +107,7 @@ router.post('/login', async (request, response) => {
     };
 
     await ensureStatsRow(user.id);
+    await ensureProfileRow(user.id);
     setSessionCookie(response, user);
     return response.json({ user });
   } catch (error) {
@@ -106,14 +118,18 @@ router.post('/login', async (request, response) => {
 
 router.get('/me', requireAuth, async (request, response) => {
   try {
+    await ensureProfileRow(request.user.sub);
     const result = await db.query(
       `SELECT u.id, u.username, u.created_at,
               COALESCE(ps.wins, 0) AS wins,
               COALESCE(ps.losses, 0) AS losses,
               COALESCE(ps.draws, 0) AS draws,
-              COALESCE(ps.current_rating, 1200) AS current_rating
+              COALESCE(ps.current_rating, 1200) AS current_rating,
+              up.display_name, up.bio, up.locale, up.rat_color,
+              up.rat_accessory, up.rat_avatar_mode
        FROM users u
        LEFT JOIN player_stats ps ON ps.user_id = u.id
+       LEFT JOIN user_profiles up ON up.user_id = u.id
        WHERE u.id = $1`,
       [request.user.sub],
     );
@@ -129,6 +145,14 @@ router.get('/me', requireAuth, async (request, response) => {
         id: row.id,
         username: row.username,
         created_at: row.created_at,
+        display_name: row.display_name || row.username,
+        bio: row.bio || '',
+        locale: row.locale || 'auto',
+        rat: {
+          color: row.rat_color || 'gold',
+          accessory: row.rat_accessory || 'pawn',
+          avatarMode: row.rat_avatar_mode || 'both',
+        },
       },
       stats: {
         wins: Number(row.wins),

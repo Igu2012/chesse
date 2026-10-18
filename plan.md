@@ -57,3 +57,13 @@ Chesse is a public-repository web chess application with a Node.js/Express backe
 ## Required behavior
 
 The implementation preserves the requested username/password-only sign-in, bcrypt hashing, proven chess libraries, Neon-backed statistics updates after checkmate or draw, dashboard profile and stats, persistent real-player matchmaking, server-authoritative move validation, English-only repository documentation/comments, and a public GitHub repository without committed environment files.
+
+## Expansion architecture
+
+- Local practice uses chess.js in the browser plus a small deterministic material-aware minimax opponent. No practice position or AI move is sent to the server; the device performs the practice computation locally.
+- Problems use browser-local puzzle positions with legal-move validation, solution hints, and a progress counter stored in localStorage.
+- Public watching uses a read-only API for active games and a polling spectator board. Spectators never receive move permissions and cannot change game state.
+- User profiles are stored in a new `user_profiles` table keyed by the existing user id. It contains display name, bio, locale, and rat customization fields without changing the existing tables.
+- Match history is read from completed `chess_games` and exposes opponent, result, color, move count, and completion time through an authenticated API route.
+- Internationalization is client-side and automatic from `navigator.language`, with English as the fallback and Portuguese, Spanish, French, and German dictionaries for all visible interface strings.
+- The rat mascot is an original transparent asset with a full-body profile presentation and a circular avatar variant. Customization changes the rat palette, accessory, and display mode while preserving the recognizable silhouette.

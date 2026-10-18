@@ -18,6 +18,8 @@ const db = require('./src/db');
 const authRoutes = require('./src/routes/auth');
 const statsRoutes = require('./src/routes/stats');
 const multiplayerRoutes = require('./src/routes/multiplayer');
+const profileRoutes = require('./src/routes/profile');
+const watchRoutes = require('./src/routes/watch');
 
 const app = express();
 const port = Number(process.env.PORT) || 3000;
@@ -52,6 +54,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/matchmaking', multiplayerRoutes);
 app.use('/api/multiplayer', multiplayerRoutes);
+app.use('/api/profile', profileRoutes);
+app.use('/api/watch', watchRoutes);
 
 app.use(express.static(publicDirectory, { extensions: ['html'] }));
 

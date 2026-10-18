@@ -82,7 +82,12 @@ input:focus { border-color: var(--yellow); }
 .topbar { display: flex; align-items: center; justify-content: space-between; min-height: 62px; padding: 0 2rem; border-bottom: 1px solid var(--line); background: var(--background); }
 .topbar-title, .match-meta, .board-status, .panel-status { display: flex; align-items: center; gap: 0.55rem; color: var(--muted); font-size: 0.64rem; font-weight: 800; letter-spacing: 0.12em; }
 .topbar-account { display: flex; align-items: center; gap: 0.65rem; color: var(--muted); font-size: 0.7rem; font-weight: 700; }
+.topbar-actions { display: flex; align-items: center; gap: 1rem; }
+#language-select { border: 1px solid var(--line); border-radius: 4px; padding: 0.35rem 0.45rem; color: var(--muted); background: var(--panel); font-size: 0.65rem; }
 .mini-avatar { width: 1.85rem; height: 1.85rem; color: #1a1710; background: var(--yellow); font-size: 0.7rem; }
+.avatar.has-rat-avatar, .mini-avatar.has-rat-avatar { position: relative; overflow: hidden; padding: 0; background: var(--panel); }
+.rat-avatar { display: block; width: 100%; height: 100%; object-fit: contain; }
+.rat-accessory-badge { position: absolute; right: 0; bottom: 0; display: grid; place-items: center; width: 0.85rem; height: 0.85rem; border-radius: 50%; color: #1a1710; background: var(--yellow); font-size: 0.55rem; }
 .live-dot, .match-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--yellow); box-shadow: 0 0 0 4px rgba(240, 185, 11, 0.14); }
 .match-dot { width: 6px; height: 6px; box-shadow: none; }
 .mobile-menu-button { display: none; border: 0; color: var(--text); background: transparent; font-size: 1.1rem; }
@@ -154,6 +159,43 @@ input:focus { border-color: var(--yellow); }
 .feature-card .button { max-width: 260px; margin-top: 1.5rem; }
 .feature-icon { color: var(--yellow); font-size: 2rem; }
 .feature-kicker { color: var(--yellow); font-size: 0.65rem; font-weight: 800; letter-spacing: 0.14em; }
+.profile-layout, .practice-layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr); gap: 1rem; align-items: start; }
+.profile-card, .history-card, .practice-card, .practice-info { max-width: none; }
+.profile-character { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; }
+.rat-full-wrap { position: relative; flex: 0 0 auto; }
+.rat-full { display: block; width: 130px; height: 150px; object-fit: contain; object-position: center bottom; }
+.rat-character-accessory { position: absolute; top: 0.5rem; right: 0; display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; color: #1a1710; background: var(--yellow); font-size: 0.8rem; }
+.profile-form { display: grid; gap: 0.85rem; }
+.profile-form label { display: grid; gap: 0.4rem; color: var(--muted); font-size: 0.7rem; font-weight: 700; }
+.profile-form input, .profile-form textarea, .profile-form select { width: 100%; border: 1px solid var(--line); border-radius: 4px; padding: 0.7rem; color: var(--text); background: var(--background); font: inherit; font-size: 0.78rem; }
+.profile-form textarea { resize: vertical; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.history-list { display: grid; gap: 0.5rem; margin-top: 1.2rem; }
+.history-row, .watch-row { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; width: 100%; border: 1px solid var(--line); border-radius: 4px; padding: 0.75rem; color: var(--text); background: var(--background); text-align: left; }
+.history-row:hover, .watch-row:hover { border-color: var(--yellow); }
+.history-row span, .watch-row span { display: grid; gap: 0.25rem; }
+.history-row small, .watch-row small { color: var(--muted); font-size: 0.65rem; }
+.history-row time { color: var(--muted); font-size: 0.65rem; }
+.history-win { color: #9bd366; } .history-loss { color: #e88d8d; } .history-draw { color: var(--yellow-hover); }
+.history-detail { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+.compact-moves { min-height: auto; margin-top: 0.75rem; color: var(--muted); font-size: 0.7rem; line-height: 1.8; }
+.mini-board { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); grid-template-rows: repeat(8, minmax(0, 1fr)); width: min(100%, 520px); aspect-ratio: 1 / 1; overflow: hidden; margin-top: 1rem; }
+.mini-board .board-square { cursor: default; }
+.mini-board .board-piece { width: 100%; height: 100%; }
+.watch-list { display: grid; gap: 0.7rem; max-width: 760px; }
+.watch-row em { color: var(--yellow); font-size: 0.7rem; font-style: normal; }
+.spectator-card { max-width: 620px; margin-top: 1rem; }
+.spectator-heading { display: flex; justify-content: space-between; gap: 1rem; color: var(--text); }
+.spectator-heading span { color: var(--yellow); }
+.practice-tabs { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.practice-tabs .button { margin-top: 0; }
+.practice-board { max-width: 520px; margin-inline: auto; cursor: pointer; }
+.practice-board .board-square { cursor: pointer; }
+.practice-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.practice-actions .button { margin-top: 0; }
+.loading-state { color: var(--muted); }
+.section-tool-heading { margin-bottom: 1rem; }
+.section-tool-heading h2 { margin: 0.5rem 0 0; font-size: 1.2rem; }
 .learning-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .learning-grid .feature-card { max-width: none; }
 .bottom-nav { display: none; }
@@ -174,6 +216,8 @@ input:focus { border-color: var(--yellow); }
   .game-panel { min-height: 500px; max-width: 700px; margin: 1.5rem auto 0; }
   .section-view { padding-bottom: 5rem; }
   .move-list { min-height: 180px; }
+  .profile-layout, .practice-layout { grid-template-columns: 1fr; }
+  .profile-character { align-items: flex-start; }
   .bottom-nav { position: fixed; z-index: 4; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(4, 1fr); padding: 0.35rem 0; border-top: 1px solid var(--line); background: var(--sidebar); }
   .bottom-nav button { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; border: 0; color: var(--muted); background: transparent; font-size: 1rem; }
   .bottom-nav button span { font-size: 0.59rem; font-weight: 700; }
@@ -197,4 +241,9 @@ input:focus { border-color: var(--yellow); }
   .game-panel { min-height: 480px; }
   .panel-tabs { gap: 0.8rem; overflow-x: auto; }
   .learning-grid { grid-template-columns: 1fr; }
+  .topbar-actions { gap: 0.45rem; }
+  #language-select { max-width: 74px; }
+  .profile-character { gap: 0.75rem; }
+  .rat-full { width: 90px; height: 110px; }
+  .form-grid { grid-template-columns: 1fr; }
 }

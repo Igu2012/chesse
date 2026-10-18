@@ -42,6 +42,7 @@ const elements = {
   flipBoardButton: document.querySelector('#flip-board-button'),
   mobileMenuButton: document.querySelector('#mobile-menu-button'),
   sidebar: document.querySelector('.global-sidebar'),
+  languageSelect: document.querySelector('#language-select'),
 };
 
 let authMode = 'login';
@@ -55,8 +56,57 @@ let gamePollingTimer = null;
 let boardOrientation = 'white';
 let selectedSquare = null;
 let legalTargets = [];
+let currentProfile = null;
+let watchPollingTimer = null;
+let practiceGame = null;
+let practiceSelectedSquare = null;
+let practiceLegalTargets = [];
+let practiceMode = 'puzzle';
+let currentLocale = 'en';
 
 const pieceAssets = '/assets/chesspieces/wikipedia';
+const ratAssets = {
+  full: '/manus-storage/async-images/lf1EpxB10XddCq8nAQz81/image-1.webp',
+  avatar: '/manus-storage/async-images/lf1EpxB10XddCq8nAQz81/image-2.webp',
+};
+
+const translations = {
+  en: {
+    play: 'Play', problems: 'Problems', learn: 'Learn', watch: 'Watch', community: 'Profile', logout: 'Sign out',
+    findOpponent: 'Find an opponent', waiting: 'Waiting for a real opponent…', newGame: 'New game',
+    practice: 'Practice locally', profile: 'Player profile', history: 'Game history', save: 'Save profile',
+    displayName: 'Display name', bio: 'Bio', ratColor: 'Rat color', accessory: 'Accessory', avatarMode: 'Show rat as',
+    language: 'Language', noHistory: 'No completed games yet.', noPublicGames: 'No public games right now.',
+    problemsSoon: 'Daily practice', practiceCopy: 'Train locally against the rat or solve a tactical position. Your moves stay on this device.',
+    localBot: 'Play against the rat', solvePuzzle: 'Solve a puzzle', showHint: 'Show hint', spectator: 'Read-only spectator board',
+    watchCopy: 'Watch active games without affecting the players.', loading: 'Loading…', win: 'Win', loss: 'Loss', draw: 'Draw',
+    gold: 'Golden', brown: 'Brown', gray: 'Gray', pink: 'Pink', blue: 'Blue', pawn: 'Pawn', crown: 'Crown', glasses: 'Glasses', none: 'None',
+    avatar: 'Avatar only', full: 'Full character only', both: 'Both', practiceTurn: 'Your turn', botTurn: 'Rat is thinking…',
+  },
+  'pt-BR': {
+    play: 'Jogar', problems: 'Problemas', learn: 'Aprender', watch: 'Assistir', community: 'Perfil', logout: 'Sair',
+    findOpponent: 'Encontrar adversário', waiting: 'Procurando um adversário real…', newGame: 'Nova partida',
+    practice: 'Treinar localmente', profile: 'Perfil do jogador', history: 'Histórico de partidas', save: 'Salvar perfil',
+    displayName: 'Nome de exibição', bio: 'Bio', ratColor: 'Cor do rato', accessory: 'Acessório', avatarMode: 'Mostrar rato como',
+    language: 'Idioma', noHistory: 'Nenhuma partida encerrada ainda.', noPublicGames: 'Nenhuma partida pública agora.',
+    problemsSoon: 'Treino diário', practiceCopy: 'Treine localmente contra o rato ou resolva uma posição tática. Seus lances ficam neste dispositivo.',
+    localBot: 'Jogar contra o rato', solvePuzzle: 'Resolver problema', showHint: 'Mostrar dica', spectator: 'Tabuleiro para espectador',
+    watchCopy: 'Assista a partidas ativas sem interferir nos jogadores.', loading: 'Carregando…', win: 'Vitória', loss: 'Derrota', draw: 'Empate',
+    gold: 'Dourado', brown: 'Marrom', gray: 'Cinza', pink: 'Rosa', blue: 'Azul', pawn: 'Peão', crown: 'Coroa', glasses: 'Óculos', none: 'Nenhum',
+    avatar: 'Somente avatar', full: 'Somente personagem', both: 'Os dois', practiceTurn: 'Sua vez', botTurn: 'O rato está pensando…',
+  },
+  es: { play: 'Jugar', problems: 'Problemas', learn: 'Aprender', watch: 'Ver', community: 'Perfil', logout: 'Salir', findOpponent: 'Encontrar rival', waiting: 'Buscando rival real…', newGame: 'Nueva partida', practice: 'Practicar localmente', profile: 'Perfil del jugador', history: 'Historial de partidas', save: 'Guardar perfil', displayName: 'Nombre visible', bio: 'Biografía', ratColor: 'Color de la rata', accessory: 'Accesorio', avatarMode: 'Mostrar rata como', language: 'Idioma', noHistory: 'Aún no hay partidas terminadas.', noPublicGames: 'No hay partidas públicas ahora.', problemsSoon: 'Práctica diaria', practiceCopy: 'Entrena localmente contra la rata o resuelve una posición táctica.', localBot: 'Jugar contra la rata', solvePuzzle: 'Resolver problema', showHint: 'Mostrar pista', spectator: 'Tablero de espectador', watchCopy: 'Mira partidas activas sin interferir.', loading: 'Cargando…', win: 'Victoria', loss: 'Derrota', draw: 'Tablas', gold: 'Dorado', brown: 'Marrón', gray: 'Gris', pink: 'Rosa', blue: 'Azul', pawn: 'Peón', crown: 'Corona', glasses: 'Gafas', none: 'Ninguno', avatar: 'Solo avatar', full: 'Solo personaje', both: 'Ambos', practiceTurn: 'Tu turno', botTurn: 'La rata está pensando…' },
+  fr: { play: 'Jouer', problems: 'Problèmes', learn: 'Apprendre', watch: 'Regarder', community: 'Profil', logout: 'Se déconnecter', findOpponent: 'Trouver un adversaire', waiting: 'Recherche d’un adversaire réel…', newGame: 'Nouvelle partie', practice: 'Entraînement local', profile: 'Profil du joueur', history: 'Historique des parties', save: 'Enregistrer le profil', displayName: 'Nom affiché', bio: 'Bio', ratColor: 'Couleur du rat', accessory: 'Accessoire', avatarMode: 'Afficher le rat comme', language: 'Langue', noHistory: 'Aucune partie terminée.', noPublicGames: 'Aucune partie publique pour le moment.', problemsSoon: 'Entraînement quotidien', practiceCopy: 'Entraînez-vous localement contre le rat ou résolvez une position tactique.', localBot: 'Jouer contre le rat', solvePuzzle: 'Résoudre un problème', showHint: 'Afficher l’indice', spectator: 'Échiquier spectateur', watchCopy: 'Regardez les parties actives sans intervenir.', loading: 'Chargement…', win: 'Victoire', loss: 'Défaite', draw: 'Nulle', gold: 'Doré', brown: 'Brun', gray: 'Gris', pink: 'Rose', blue: 'Bleu', pawn: 'Pion', crown: 'Couronne', glasses: 'Lunettes', none: 'Aucun', avatar: 'Avatar uniquement', full: 'Personnage uniquement', both: 'Les deux', practiceTurn: 'À vous', botTurn: 'Le rat réfléchit…' },
+  de: { play: 'Spielen', problems: 'Aufgaben', learn: 'Lernen', watch: 'Zuschauen', community: 'Profil', logout: 'Abmelden', findOpponent: 'Gegner finden', waiting: 'Suche einen echten Gegner…', newGame: 'Neue Partie', practice: 'Lokal trainieren', profile: 'Spielerprofil', history: 'Partieverlauf', save: 'Profil speichern', displayName: 'Anzeigename', bio: 'Bio', ratColor: 'Rattenfarbe', accessory: 'Accessoire', avatarMode: 'Ratte anzeigen als', language: 'Sprache', noHistory: 'Noch keine beendeten Partien.', noPublicGames: 'Keine öffentlichen Partien.', problemsSoon: 'Tägliches Training', practiceCopy: 'Trainiere lokal gegen die Ratte oder löse eine taktische Stellung.', localBot: 'Gegen die Ratte spielen', solvePuzzle: 'Aufgabe lösen', showHint: 'Tipp anzeigen', spectator: 'Zuschauerbrett', watchCopy: 'Aktive Partien ansehen, ohne einzugreifen.', loading: 'Laden…', win: 'Sieg', loss: 'Niederlage', draw: 'Remis', gold: 'Gold', brown: 'Braun', gray: 'Grau', pink: 'Rosa', blue: 'Blau', pawn: 'Bauer', crown: 'Krone', glasses: 'Brille', none: 'Keine', avatar: 'Nur Avatar', full: 'Nur Figur', both: 'Beides', practiceTurn: 'Du bist am Zug', botTurn: 'Die Ratte denkt…' },
+};
+
+Object.assign(translations.en, { username: 'Username', password: 'Password', signIn: 'Sign in', createAccount: 'Create account', welcome: 'Welcome back', joinDesk: 'Join the desk', center: 'Control the center', castle: 'Castle early', centerCopy: 'Fight for the central squares and develop your minor pieces before moving the same piece twice.', castleCopy: 'Keep your king safe and connect your rooks before starting a central attack.', learning: 'Learning center' });
+Object.assign(translations['pt-BR'], { username: 'Usuário', password: 'Senha', signIn: 'Entrar', createAccount: 'Criar conta', welcome: 'Bem-vindo de volta', joinDesk: 'Entre para jogar', center: 'Controle o centro', castle: 'Faça o roque', centerCopy: 'Dispute as casas centrais e desenvolva suas peças menores antes de mover a mesma peça duas vezes.', castleCopy: 'Coloque o rei em segurança e conecte as torres antes de iniciar um ataque no centro.', learning: 'Centro de aprendizado' });
+Object.keys(translations).filter((locale) => !['en', 'pt-BR'].includes(locale)).forEach((locale) => Object.assign(translations[locale], translations.en));
+
+function t(key) {
+  return translations[currentLocale]?.[key] || translations.en[key] || key;
+}
 
 const sectionData = {
   problems: {
@@ -84,6 +134,85 @@ const sectionData = {
     content: '<div class="feature-card"><span class="feature-icon">♙</span><h2>Perfil do jogador</h2><p>Use o matchmaking para criar seu histórico real contra outros jogadores. Suas estatísticas são atualizadas pelo servidor ao final da partida.</p><button class="button button-primary" type="button" data-section="play">Jogar agora <span>→</span></button></div>',
   },
 };
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+}
+
+function ratFilter(color) {
+  return { gold: 'none', brown: 'sepia(0.65) saturate(0.8)', gray: 'grayscale(0.9)', pink: 'hue-rotate(300deg) saturate(1.15)', blue: 'hue-rotate(170deg) saturate(1.1)' }[color] || 'none';
+}
+
+function ratAccessoryMark(accessory) {
+  return { pawn: '♟', crown: '♛', glasses: '◉', none: '' }[accessory] || '';
+}
+
+function applyProfile(user) {
+  currentProfile = user;
+  const name = user.display_name || user.username;
+  const initial = name.charAt(0).toUpperCase();
+  elements.profileUsername.textContent = name;
+  elements.topbarUsername.textContent = name.toUpperCase();
+  elements.boardUsername.textContent = name;
+  elements.profileAvatar.textContent = initial;
+  elements.topbarAvatar.textContent = initial;
+  elements.boardAvatar.textContent = initial;
+  const showRatAvatar = ['avatar', 'both'].includes(user.rat?.avatarMode);
+  [elements.profileAvatar, elements.topbarAvatar, elements.boardAvatar].forEach((avatar) => {
+    if (!avatar) return;
+    avatar.innerHTML = showRatAvatar ? `<img class="rat-avatar" src="${ratAssets.avatar}" alt="Chesse rat avatar" style="filter:${ratFilter(user.rat?.color)}"><span class="rat-accessory-badge">${ratAccessoryMark(user.rat?.accessory)}</span>` : initial;
+    avatar.classList.toggle('has-rat-avatar', showRatAvatar);
+  });
+  const requestedLocale = localStorage.getItem('chesse-locale') || user.locale || 'auto';
+  currentLocale = requestedLocale === 'auto' ? detectLocale() : (translations[requestedLocale] ? requestedLocale : 'en');
+  if (elements.languageSelect) elements.languageSelect.value = requestedLocale;
+  applyTranslations();
+}
+
+function detectLocale() {
+  const language = (navigator.language || 'en').toLowerCase();
+  if (language.startsWith('pt')) return 'pt-BR';
+  if (language.startsWith('es')) return 'es';
+  if (language.startsWith('fr')) return 'fr';
+  if (language.startsWith('de')) return 'de';
+  return 'en';
+}
+
+function applyTranslations() {
+  const navKeys = { play: 'play', problems: 'problems', learn: 'learn', watch: 'watch', community: 'community' };
+  document.querySelectorAll('.nav-item[data-section]').forEach((button) => {
+    const label = button.querySelector('span:last-child');
+    if (label && navKeys[button.dataset.section]) label.textContent = t(navKeys[button.dataset.section]);
+  });
+  document.querySelectorAll('.bottom-nav [data-section]').forEach((button) => {
+    const label = button.querySelector('span');
+    if (label && navKeys[button.dataset.section]) label.textContent = t(navKeys[button.dataset.section]);
+  });
+  elements.logoutButton.textContent = t('logout');
+  elements.languageSelect?.setAttribute('aria-label', t('language'));
+  const usernameLabel = document.querySelector('label[for="username"]');
+  const passwordLabel = document.querySelector('label[for="password"]');
+  if (usernameLabel) usernameLabel.textContent = t('username');
+  if (passwordLabel) passwordLabel.textContent = t('password');
+  document.querySelectorAll('.tab-button').forEach((button) => { button.textContent = button.dataset.mode === 'login' ? t('signIn') : t('createAccount'); });
+  const introEyebrow = document.querySelector('.auth-intro .eyebrow');
+  const authEyebrow = document.querySelector('#auth-eyebrow');
+  if (introEyebrow) introEyebrow.textContent = currentLocale === 'pt-BR' ? 'A MESA DIÁRIA DE XADREZ' : 'THE DAILY CHESS DESK';
+  if (authEyebrow) authEyebrow.textContent = authMode === 'signup' ? t('joinDesk') : t('welcome');
+}
+
+function boardMarkup(chess, orientation = 'white', interactive = false) {
+  const files = orientation === 'white' ? ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'] : ['h', 'g', 'f', 'e', 'd', 'c', 'b', 'a'];
+  const ranks = orientation === 'white' ? [8, 7, 6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6, 7, 8];
+  return ranks.flatMap((rank, rankIndex) => files.map((file, fileIndex) => {
+    const square = `${file}${rank}`;
+    const piece = chess.get(square);
+    const isLight = (file.charCodeAt(0) - 97 + rank) % 2 === 0;
+    const pieceMarkup = piece ? `<img class="board-piece" src="${pieceAssets}/${piece.color}${piece.type.toUpperCase()}.png" alt="${piece.color === 'w' ? 'White' : 'Black'} ${piece.type}">` : '';
+    const labels = `${fileIndex === 0 ? `<span class="board-rank-label">${rank}</span>` : ''}${rankIndex === 7 ? `<span class="board-file-label">${file}</span>` : ''}`;
+    return `<div class="board-square ${isLight ? 'square-light' : 'square-dark'}" ${interactive ? `data-practice-square="${square}"` : ''}>${labels}${pieceMarkup}</div>`;
+  })).join('');
+}
 
 async function api(path, options = {}) {
   const response = await fetch(path, {
@@ -258,18 +387,28 @@ function setIdleBoard() {
 function showDashboard(payload) {
   elements.authView.classList.add('is-hidden');
   elements.dashboardView.classList.remove('is-hidden');
-  const username = payload.user.username;
-  const initial = username.charAt(0).toUpperCase();
-  elements.profileUsername.textContent = username;
-  elements.topbarUsername.textContent = username.toUpperCase();
-  document.querySelector('#topbar-avatar').textContent = initial;
-  elements.profileAvatar.textContent = initial;
-  elements.boardUsername.textContent = username;
-  elements.boardAvatar.textContent = initial;
+  applyProfile(payload.user);
   setStats(payload.stats);
   setIdleBoard();
   showSection('play');
   pollMatchmakingStatus();
+}
+
+async function changeLocale(event) {
+  const selected = event.target.value;
+  localStorage.setItem('chesse-locale', selected);
+  currentLocale = selected === 'auto' ? detectLocale() : selected;
+  applyTranslations();
+  if (!currentProfile) return;
+  try {
+    await api('/api/profile', { method: 'PATCH', body: JSON.stringify({
+      displayName: currentProfile.display_name || currentProfile.displayName || '',
+      bio: currentProfile.bio || '', locale: selected,
+      rat: currentProfile.rat || { color: 'gold', accessory: 'pawn', avatarMode: 'both' },
+    }) });
+  } catch (error) {
+    console.warn('Language preference could not be saved:', error.message);
+  }
 }
 
 function showAuth() {
@@ -285,10 +424,10 @@ function switchAuthMode(mode) {
     button.classList.toggle('active', active);
     button.setAttribute('aria-selected', String(active));
   });
-  elements.authEyebrow.textContent = isSignup ? 'JOIN THE DESK' : 'WELCOME BACK';
-  elements.authTitle.textContent = isSignup ? 'Create your player desk' : 'Sign in to your desk';
-  elements.authSubtitle.textContent = isSignup ? 'Start a record that stays in view.' : 'Keep your board and record in one place.';
-  elements.authSubmit.innerHTML = `${isSignup ? 'Create account' : 'Sign in'} <span aria-hidden="true">↗</span>`;
+  elements.authEyebrow.textContent = isSignup ? t('joinDesk') : t('welcome');
+  elements.authTitle.textContent = isSignup ? (currentLocale === 'pt-BR' ? 'Crie seu espaço de jogador' : 'Create your player desk') : (currentLocale === 'pt-BR' ? 'Entre no seu espaço' : 'Sign in to your desk');
+  elements.authSubtitle.textContent = isSignup ? (currentLocale === 'pt-BR' ? 'Comece um histórico que fica sempre à vista.' : 'Start a record that stays in view.') : (currentLocale === 'pt-BR' ? 'Seu tabuleiro e histórico em um só lugar.' : 'Keep your board and record in one place.');
+  elements.authSubmit.innerHTML = `${isSignup ? t('createAccount') : t('signIn')} <span aria-hidden="true">↗</span>`;
   elements.password.autocomplete = isSignup ? 'new-password' : 'current-password';
   elements.passwordHint.textContent = isSignup ? 'Use at least 8 characters.' : 'Your password is never stored in plain text.';
   setAuthMessage('');
@@ -455,15 +594,25 @@ function showSection(section) {
   elements.playPage.classList.toggle('is-hidden', !isPlay);
   elements.sectionView.classList.toggle('is-hidden', isPlay);
   document.querySelectorAll('[data-section]').forEach((item) => item.classList.toggle('active', item.dataset.section === section));
+  elements.sidebar.classList.remove('open');
   if (!isPlay) {
     const data = sectionData[section] || sectionData.community;
-    elements.sectionEyebrow.textContent = data.eyebrow;
-    elements.sectionTitle.textContent = data.title;
-    elements.sectionCopy.textContent = data.copy;
+    elements.sectionEyebrow.textContent = section === 'problems' ? t('practice') : section === 'community' ? t('profile') : section === 'watch' ? t('watch') : data.eyebrow;
+    elements.sectionTitle.textContent = section === 'problems' ? t('problems') : section === 'community' ? t('profile') : section === 'watch' ? t('watch') : data.title;
+    elements.sectionCopy.textContent = section === 'problems' || section === 'watch' ? t(section === 'problems' ? 'practiceCopy' : 'watchCopy') : data.copy;
+    if (section === 'learn') {
+      elements.sectionEyebrow.textContent = t('learning');
+      elements.sectionTitle.textContent = t('learn');
+      elements.sectionCopy.textContent = t('centerCopy');
+      elements.sectionContent.innerHTML = `<div class="learning-grid"><div class="feature-card"><span class="feature-kicker">01 / OPENING</span><h2>${t('center')}</h2><p>${t('centerCopy')}</p></div><div class="feature-card"><span class="feature-kicker">02 / SAFETY</span><h2>${t('castle')}</h2><p>${t('castleCopy')}</p></div></div>`;
+      return;
+    }
+    if (section === 'problems') return renderProblemsSection();
+    if (section === 'community') return renderCommunitySection();
+    if (section === 'watch') return renderWatchSection();
     elements.sectionContent.innerHTML = data.content;
     elements.sectionContent.querySelectorAll('[data-section]').forEach((button) => button.addEventListener('click', () => showSection(button.dataset.section)));
   }
-  elements.sidebar.classList.remove('open');
 }
 
 async function logout() {
@@ -501,9 +650,206 @@ elements.newGameFromPanel.addEventListener('click', joinMatchmaking);
 elements.leaveQueueButton.addEventListener('click', leaveMatchmaking);
 elements.drawButton.addEventListener('click', () => finishGame('draw'));
 elements.resignButton.addEventListener('click', () => finishGame('resign'));
+elements.languageSelect?.addEventListener('change', changeLocale);
 elements.flipBoardButton.addEventListener('click', () => {
   boardOrientation = boardOrientation === 'white' ? 'black' : 'white';
   renderBoard();
 });
 elements.mobileMenuButton.addEventListener('click', () => elements.sidebar.classList.toggle('open'));
 bootstrap();
+
+
+function profileSectionMarkup(profile, history) {
+  const rat = profile.rat || { color: 'gold', accessory: 'pawn', avatarMode: 'both' };
+  const historyMarkup = history.length ? history.map((game) => `<button class="history-row" type="button" data-history-game="${game.id}"><span><strong>${escapeHtml(game.opponentDisplayName)}</strong><small>${escapeHtml(game.opponentUsername)} · ${game.moveCount} moves</small></span><b class="history-${game.outcome}">${t(game.outcome)}</b><time>${new Date(game.completedAt).toLocaleDateString()}</time></button>`).join('') : `<p class="empty-state">${t('noHistory')}</p>`;
+  return `<div class="profile-layout">
+    <div class="feature-card profile-card"><div class="profile-character">${rat.avatarMode !== 'avatar' ? `<div class="rat-full-wrap"><img class="rat-full" src="${ratAssets.full}" alt="Chesse rat character" style="filter:${ratFilter(rat.color)}"><span class="rat-character-accessory">${ratAccessoryMark(rat.accessory)}</span></div>` : ''}<div><span class="feature-kicker">${t('profile')}</span><h2>${escapeHtml(profile.displayName)}</h2><p>${escapeHtml(profile.bio || 'Your chess story starts here.')}</p></div></div>
+      <form id="profile-form" class="profile-form"><label>${t('displayName')}<input name="displayName" maxlength="40" value="${escapeHtml(profile.displayName)}"></label><label>${t('bio')}<textarea name="bio" maxlength="280" rows="3">${escapeHtml(profile.bio)}</textarea></label><div class="form-grid"><label>${t('ratColor')}<select name="ratColor"><option value="gold">${t('gold')}</option><option value="brown">${t('brown')}</option><option value="gray">${t('gray')}</option><option value="pink">${t('pink')}</option><option value="blue">${t('blue')}</option></select></label><label>${t('accessory')}<select name="ratAccessory"><option value="pawn">${t('pawn')}</option><option value="crown">${t('crown')}</option><option value="glasses">${t('glasses')}</option><option value="none">${t('none')}</option></select></label></div><label>${t('avatarMode')}<select name="ratAvatarMode"><option value="avatar">${t('avatar')}</option><option value="full">${t('full')}</option><option value="both">${t('both')}</option></select></label><button class="button button-primary" type="submit">${t('save')} <span>↗</span></button><p class="form-message" id="profile-message" role="status"></p></form>
+    </div>
+    <div class="feature-card history-card"><div class="panel-heading"><div><span class="feature-kicker">${t('history')}</span><h2>${t('history')}</h2></div></div><div class="history-list">${historyMarkup}</div><div id="history-detail"></div></div>
+  </div>`;
+}
+
+async function renderCommunitySection() {
+  elements.sectionContent.innerHTML = `<p class="loading-state">${t('loading')}</p>`;
+  try {
+    const [profilePayload, historyPayload] = await Promise.all([api('/api/profile'), api('/api/profile/history')]);
+    const profile = { ...profilePayload.profile, username: profilePayload.username };
+    currentProfile = profile;
+    elements.sectionContent.innerHTML = profileSectionMarkup(profile, historyPayload.games);
+    const form = document.querySelector('#profile-form');
+    const colorSelect = form.elements.ratColor;
+    colorSelect.value = profile.rat.color;
+    form.elements.ratAccessory.value = profile.rat.accessory;
+    form.elements.ratAvatarMode.value = profile.rat.avatarMode;
+    form.addEventListener('submit', saveProfile);
+    elements.sectionContent.querySelectorAll('[data-history-game]').forEach((button) => button.addEventListener('click', () => loadHistoryDetail(button.dataset.historyGame)));
+  } catch (error) {
+    elements.sectionContent.innerHTML = `<div class="feature-card"><p class="form-message is-error">${escapeHtml(error.message)}</p></div>`;
+  }
+}
+
+async function saveProfile(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const payload = await api('/api/profile', { method: 'PATCH', body: JSON.stringify({
+    displayName: form.elements.displayName.value,
+    bio: form.elements.bio.value,
+    locale: elements.languageSelect?.value || currentLocale,
+    rat: { color: form.elements.ratColor.value, accessory: form.elements.ratAccessory.value, avatarMode: form.elements.ratAvatarMode.value },
+  }) });
+  currentProfile = { ...(currentProfile || {}), ...payload.profile };
+  const session = await api('/api/auth/me');
+  applyProfile(session.user);
+  setStats(session.stats);
+  form.querySelector('#profile-message').textContent = 'Profile saved.';
+  form.querySelector('#profile-message').classList.add('is-success');
+  renderCommunitySection();
+}
+
+async function loadHistoryDetail(gameId) {
+  const target = document.querySelector('#history-detail');
+  if (!target) return;
+  target.innerHTML = `<p class="loading-state">${t('loading')}</p>`;
+  try {
+    const payload = await api(`/api/profile/history/${gameId}`);
+    const chess = new Chess(payload.game.fen);
+    target.innerHTML = `<div class="history-detail"><span class="feature-kicker">${t('history')}</span><div class="mini-board history-board">${boardMarkup(chess, payload.game.playerColor)}</div><div class="move-list compact-moves">${payload.game.moves.map((move) => `<span>${move.ply}. ${escapeHtml(move.san)}</span>`).join(' ')}</div></div>`;
+  } catch (error) {
+    target.innerHTML = `<p class="form-message is-error">${escapeHtml(error.message)}</p>`;
+  }
+}
+
+function renderWatchList(games) {
+  if (!games.length) return `<div class="feature-card"><span class="feature-icon">◉</span><h2>${t('noPublicGames')}</h2><p>${t('watchCopy')}</p><button class="button button-primary" type="button" data-section="play">${t('findOpponent')} <span>→</span></button></div>`;
+  return `<div class="watch-list">${games.map((game) => `<button class="watch-row" type="button" data-watch-game="${game.id}"><span><strong>${escapeHtml(game.white.displayName)}</strong><em>vs</em><strong>${escapeHtml(game.black.displayName)}</strong></span><small>${game.moveCount} moves · LIVE</small></button>`).join('')}</div>`;
+}
+
+async function renderWatchSection() {
+  window.clearInterval(watchPollingTimer);
+  elements.sectionContent.innerHTML = `<p class="loading-state">${t('loading')}</p>`;
+  try {
+    const payload = await api('/api/watch/games');
+    elements.sectionContent.innerHTML = `<div class="section-tool-heading"><span class="feature-kicker">${t('watch')}</span><h2>${t('watchCopy')}</h2></div>${renderWatchList(payload.games)}<div id="watch-detail"></div>`;
+    bindWatchActions();
+    watchPollingTimer = window.setInterval(() => refreshWatchList(), 2500);
+  } catch (error) {
+    elements.sectionContent.innerHTML = `<div class="feature-card"><p class="form-message is-error">${escapeHtml(error.message)}</p></div>`;
+  }
+}
+
+function bindWatchActions() {
+  elements.sectionContent.querySelectorAll('[data-watch-game]').forEach((button) => button.addEventListener('click', () => loadWatchGame(button.dataset.watchGame)));
+  elements.sectionContent.querySelectorAll('[data-section]').forEach((button) => button.addEventListener('click', () => showSection(button.dataset.section)));
+}
+
+async function refreshWatchList() {
+  if (!document.querySelector('.watch-list')) return;
+  try {
+    const payload = await api('/api/watch/games');
+    const list = document.querySelector('.watch-list');
+    if (list) { list.outerHTML = renderWatchList(payload.games); bindWatchActions(); }
+  } catch (error) {
+    console.warn('Watch list refresh failed:', error.message);
+  }
+}
+
+async function loadWatchGame(gameId) {
+  const target = document.querySelector('#watch-detail');
+  if (!target) return;
+  try {
+    const payload = await api(`/api/watch/games/${gameId}`);
+    const chess = new Chess(payload.game.fen);
+    target.innerHTML = `<div class="feature-card spectator-card"><div class="spectator-heading"><strong>${escapeHtml(payload.game.white.displayName)}</strong><span>vs</span><strong>${escapeHtml(payload.game.black.displayName)}</strong></div><div class="mini-board spectator-board">${boardMarkup(chess)}</div><div class="move-list compact-moves">${payload.game.moves.map((move) => `<span>${Math.ceil(move.ply / 2)}. ${escapeHtml(move.san)}</span>`).join(' ') || t('loading')}</div><p class="panel-status"><span class="live-dot"></span>${t('spectator')}</p></div>`;
+  } catch (error) {
+    target.innerHTML = `<p class="form-message is-error">${escapeHtml(error.message)}</p>`;
+  }
+}
+
+const practicePuzzle = { fen: '4k3/8/8/8/8/8/4R3/6K1 w - - 0 1', from: 'e2', to: 'e8', hint: 'Move the rook up the open e-file to give check.' };
+
+function practiceMarkup() {
+  const board = practiceGame ? boardMarkup(practiceGame, 'white', true) : '';
+  return `<div class="practice-layout"><div class="feature-card practice-card"><div class="practice-tabs"><button class="button ${practiceMode === 'puzzle' ? 'button-primary' : 'button-secondary'}" data-practice-mode="puzzle">${t('solvePuzzle')}</button><button class="button ${practiceMode === 'bot' ? 'button-primary' : 'button-secondary'}" data-practice-mode="bot">${t('localBot')}</button></div><p class="panel-copy">${t('practiceCopy')}</p><div class="practice-board mini-board">${board}</div><p id="practice-status" class="panel-status">${practiceMode === 'bot' ? t('practiceTurn') : 'Find the winning move.'}</p><div class="practice-actions"><button class="button button-secondary" id="practice-hint">${t('showHint')}</button><button class="button button-primary" id="practice-reset">Reset</button></div></div><div class="feature-card practice-info"><img class="rat-full" src="${ratAssets.full}" alt="Chesse rat character"><h2>${t('problemsSoon')}</h2><p>${t('practiceCopy')}</p></div></div>`;
+}
+
+function renderProblemsSection() {
+  practiceMode = 'puzzle';
+  practiceGame = new Chess(practicePuzzle.fen);
+  practiceSelectedSquare = null;
+  practiceLegalTargets = [];
+  elements.sectionContent.innerHTML = practiceMarkup();
+  bindPracticeActions();
+}
+
+function bindPracticeActions() {
+  elements.sectionContent.querySelectorAll('[data-practice-mode]').forEach((button) => button.addEventListener('click', () => {
+    practiceMode = button.dataset.practiceMode;
+    practiceGame = practiceMode === 'puzzle' ? new Chess(practicePuzzle.fen) : new Chess();
+    practiceSelectedSquare = null;
+    practiceLegalTargets = [];
+    elements.sectionContent.innerHTML = practiceMarkup();
+    bindPracticeActions();
+  }));
+  elements.sectionContent.querySelectorAll('[data-practice-square]').forEach((square) => square.addEventListener('click', () => handlePracticeSquare(square.dataset.practiceSquare)));
+  document.querySelector('#practice-hint')?.addEventListener('click', () => { const status = document.querySelector('#practice-status'); if (status) status.textContent = practiceMode === 'puzzle' ? practicePuzzle.hint : 'The rat evaluates material, checks, and captures locally.'; });
+  document.querySelector('#practice-reset')?.addEventListener('click', () => { practiceGame = practiceMode === 'puzzle' ? new Chess(practicePuzzle.fen) : new Chess(); practiceSelectedSquare = null; practiceLegalTargets = []; elements.sectionContent.innerHTML = practiceMarkup(); bindPracticeActions(); });
+}
+
+function handlePracticeSquare(square) {
+  if (!practiceGame) return;
+  if (practiceSelectedSquare && practiceLegalTargets.includes(square)) {
+    const from = practiceSelectedSquare;
+    const move = practiceGame.move({ from, to: square, promotion: 'q' });
+    practiceSelectedSquare = null;
+    practiceLegalTargets = [];
+    if (move && practiceMode === 'puzzle') {
+      const status = document.querySelector('#practice-status');
+      if (from === practicePuzzle.from && square === practicePuzzle.to) { if (status) status.textContent = 'Excellent. Puzzle solved.'; } else if (status) status.textContent = 'Legal move, but try to find the forcing check.';
+    }
+    if (move && practiceMode === 'bot') window.setTimeout(makeLocalRatMove, 280);
+    elements.sectionContent.querySelector('.practice-board').innerHTML = boardMarkup(practiceGame);
+    bindPracticeActions();
+    return;
+  }
+  const piece = practiceGame.get(square);
+  if (piece && piece.color === practiceGame.turn()) {
+    practiceSelectedSquare = square;
+    practiceLegalTargets = practiceGame.moves({ square, verbose: true }).map((move) => move.to);
+  }
+}
+
+function evaluatePosition(chess) {
+  const values = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 };
+  return chess.board().flat().reduce((score, piece) => score + (piece ? (piece.color === 'b' ? values[piece.type] : -values[piece.type]) : 0), 0);
+}
+
+function chooseLocalRatMove(chess, depth = 2) {
+  const moves = chess.moves({ verbose: true });
+  let bestMove = moves[0];
+  let bestScore = -Infinity;
+  moves.forEach((candidate) => {
+    const next = new Chess(chess.fen());
+    next.move(candidate);
+    const score = depth <= 1 ? evaluatePosition(next) : chooseLocalRatScore(next, depth - 1, false);
+    if (score > bestScore) { bestScore = score; bestMove = candidate; }
+  });
+  return bestMove;
+}
+
+function chooseLocalRatScore(chess, depth, maximizing) {
+  if (depth === 0 || chess.game_over()) return evaluatePosition(chess);
+  const moves = chess.moves({ verbose: true });
+  const scores = moves.map((candidate) => { const next = new Chess(chess.fen()); next.move(candidate); return chooseLocalRatScore(next, depth - 1, !maximizing); });
+  return maximizing ? Math.max(...scores) : Math.min(...scores);
+}
+
+function makeLocalRatMove() {
+  if (practiceMode !== 'bot' || !practiceGame || practiceGame.game_over() || practiceGame.turn() !== 'b') return;
+  const status = document.querySelector('#practice-status');
+  if (status) status.textContent = t('botTurn');
+  const move = chooseLocalRatMove(practiceGame);
+  if (move) practiceGame.move(move);
+  elements.sectionContent.innerHTML = practiceMarkup();
+  bindPracticeActions();
+}
