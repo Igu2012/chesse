@@ -66,8 +66,8 @@ let currentLocale = 'en';
 
 const pieceAssets = '/assets/chesspieces/wikipedia';
 const ratAssets = {
-  full: '/manus-storage/async-images/lf1EpxB10XddCq8nAQz81/image-1.webp',
-  avatar: '/manus-storage/async-images/lf1EpxB10XddCq8nAQz81/image-2.webp',
+  full: '/assets/rat/chesse-rat-full.svg',
+  avatar: '/assets/rat/chesse-rat-avatar.svg',
 };
 
 const translations = {

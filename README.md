@@ -20,7 +20,7 @@ Chesse is a compact web chess dashboard inspired by modern online chess platform
 - Editable display name, bio, locale, rat color, rat accessory, and avatar mode.
 - A full game-history view with saved final positions and move lists.
 - Automatic language detection with English, Portuguese, Spanish, French, and German translations plus a language override.
-- Original transparent chubby rat mascot assets for profiles and avatars.
+- Original transparent chubby rat mascot SVG assets for profiles and avatars.
 - Render Blueprint and production Dockerfile.
 - No environment files or credentials are committed.
 
