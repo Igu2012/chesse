@@ -72,6 +72,24 @@ const ratAssets = {
   avatar: '/assets/rat/chesse-rat-avatar.svg',
 };
 
+const ratItemAssets = {
+  'cap-blue': '/manus-storage/async-images/10pFiEjEtAVWrVOR4XblXj/image-1.webp',
+  'cap-green': '/manus-storage/async-images/10pFiEjEtAVWrVOR4XblXj/image-2.webp',
+  beanie: '/manus-storage/async-images/10pFiEjEtAVWrVOR4XblXj/image-3.webp',
+  cebolinha: '/manus-storage/async-images/10pFiEjEtAVWrVOR4XblXj/image-4.webp',
+  tuft: '/manus-storage/async-images/10pFiEjEtAVWrVOR4XblXj/image-5.webp',
+  palmeiras: '/manus-storage/async-images/zz4eogOmsqkiT2uevyzROG/image-1.webp',
+  hoodie: '/manus-storage/async-images/zz4eogOmsqkiT2uevyzROG/image-2.webp',
+  full: '/manus-storage/async-images/zz4eogOmsqkiT2uevyzROG/image-3.webp',
+  glasses: '/manus-storage/async-images/zz4eogOmsqkiT2uevyzROG/image-4.webp',
+  headphones: '/manus-storage/async-images/zz4eogOmsqkiT2uevyzROG/image-5.webp',
+  denim: '/manus-storage/async-images/kGhBqfvcJAh7RAM2aFAcg8/image-1.webp',
+  black: '/manus-storage/async-images/kGhBqfvcJAh7RAM2aFAcg8/image-2.webp',
+  shorts: '/manus-storage/async-images/kGhBqfvcJAh7RAM2aFAcg8/image-3.webp',
+  goatee: '/manus-storage/async-images/kGhBqfvcJAh7RAM2aFAcg8/image-4.webp',
+  mustache: '/manus-storage/async-images/kGhBqfvcJAh7RAM2aFAcg8/image-5.webp',
+};
+
 const translations = {
   en: {
     play: 'Play', problems: 'Problems', learn: 'Learn', watch: 'Watch', community: 'Profile', logout: 'Sign out',
@@ -155,14 +173,11 @@ function ratCharacterMarkup(rat = {}, mode = 'full') {
     hair: rat.hair || 'none', shirt: rat.shirt || 'none', pants: rat.pants || 'none',
     beard: rat.beard || 'none', accessory: rat.accessory || 'none',
   };
+  const item = (name, value, extraClass = '') => ratItemAssets[value] ? `<img class="rat-layer rat-image-layer rat-image-${name} ${extraClass}" src="${ratItemAssets[value]}" alt="" aria-hidden="true">` : '';
   return `<span class="rat-stage rat-stage-${mode} rat-bg-${safe.background} rat-fur-${safe.color}">
     <img src="${mode === 'avatar' ? ratAssets.avatar : ratAssets.full}" alt="Chesse rat character" class="rat-base">
-    <span class="rat-layer rat-shirt-layer shirt-${safe.shirt}">${safe.shirt === 'palmeiras' ? 'P' : ''}</span>
-    <span class="rat-layer rat-pants-layer pants-${safe.pants}"></span>
-    <span class="rat-layer rat-hair-layer hair-${safe.hair}"></span>
-    <span class="rat-layer rat-hat-layer hat-${safe.hat}"></span>
-    <span class="rat-layer rat-beard-layer beard-${safe.beard}"></span>
-    <span class="rat-layer rat-accessory-layer accessory-${safe.accessory}">${ratAccessoryMark(safe.accessory)}</span>
+    ${item('shirt', safe.shirt)}${item('pants', safe.pants)}${item('hair', safe.hair)}${item('hat', safe.hat)}${item('beard', safe.beard)}${item('accessory', safe.accessory)}
+    <span class="rat-layer rat-shirt-layer shirt-${safe.shirt}"></span><span class="rat-layer rat-pants-layer pants-${safe.pants}"></span><span class="rat-layer rat-hair-layer hair-${safe.hair}"></span><span class="rat-layer rat-hat-layer hat-${safe.hat}"></span><span class="rat-layer rat-beard-layer beard-${safe.beard}"></span><span class="rat-layer rat-accessory-layer accessory-${safe.accessory}">${ratAccessoryMark(safe.accessory)}</span>
   </span>`;
 }
 
@@ -691,7 +706,7 @@ function profileSectionMarkup(profile, history) {
     ['beard', 'Beards', '⌣', 'Beards', [['none','Clean',''],['goatee','Goatee',''],['mustache','Mustache',''],['full','Full beard',''],['royal','Royal beard','']]],
     ['accessory', 'Extras', '✦', 'Extras', [['none','None',''],['glasses','Glasses','◉'],['star-earring','Star earring','✦'],['headphones','Headphones','◒']]],
   ];
-  const options = (name, title, values) => `<fieldset class="customizer-group"><legend>${title}</legend><div class="customizer-options">${values.map(([value, label, icon]) => `<button type="button" class="customizer-option ${rat[name] === value ? 'selected' : ''}" data-rat-choice="${name}" data-rat-value="${value}"><span class="option-art option-${value}">${icon || ''}</span><small>${label}</small></button>`).join('')}</div></fieldset>`;
+  const options = (name, title, values) => `<fieldset class="customizer-group"><legend>${title}</legend><div class="customizer-options">${values.map(([value, label, icon]) => `<button type="button" class="customizer-option ${rat[name] === value ? 'selected' : ''}" data-rat-choice="${name}" data-rat-value="${value}" aria-label="${label}" title="${label}"><span class="option-art option-${value}">${ratItemAssets[value] ? `<img src="${ratItemAssets[value]}" alt="" aria-hidden="true">` : icon || ''}</span></button>`).join('')}</div></fieldset>`;
   const customizer = `<div class="customizer-tabs" role="tablist">${groups.map(([name, label, icon]) => `<button type="button" class="customizer-tab ${customizerCategory === name ? 'active' : ''}" data-customizer-tab="${name}" role="tab"><span>${icon}</span><small>${label}</small></button>`).join('')}</div><div class="customizer-panels">${groups.map(([name, , , title, values]) => `<div class="customizer-panel ${customizerCategory === name ? 'active' : ''}" data-customizer-panel="${name}">${options(name, title, values)}</div>`).join('')}</div>${groups.map(([name]) => `<input type="hidden" name="${name}" value="${rat[name] || 'none'}">`).join('')}`;
   return `<div class="profile-layout">
     <div class="feature-card profile-card"><div class="profile-character" id="profile-rat-preview">${rat.avatarMode !== 'avatar' ? `<div class="rat-full-wrap">${ratCharacterMarkup(rat, 'full')}</div>` : ''}<div><span class="feature-kicker">${t('profile')}</span><h2>${escapeHtml(profile.displayName)}</h2><p>${escapeHtml(profile.bio || 'Your chess story starts here.')}</p></div></div>
