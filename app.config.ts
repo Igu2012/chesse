@@ -1,3 +1,3 @@
 export default {
-  logoUrl: "https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg"
+  logoUrl: "https://raw.githubusercontent.com/Igu2012/chesse/main/public/pawn-logo.png"
 };

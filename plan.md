@@ -33,24 +33,24 @@ Chesse is a public-repository web chess application with a Node.js/Express backe
 
 ### Candidate styles
 
-1. **Tournament editorial desk** — 0.07 probability: a quiet, paper-like board framed by dark ink panels and precise scorecard typography.
-2. **Neon arena** — 0.04 probability: electric cyan and magenta accents over a deep graphite interface with energetic motion.
+1. **Dark competitive arena** — 0.07 probability: a Chess.com-inspired dark board room with compact navigation, active clocks, and bold yellow actions.
+2. **Tournament editorial desk** — 0.04 probability: a quiet scorecard interface framed by dark panels and precise match typography.
 3. **Library clubroom** — 0.08 probability: warm walnut, parchment, and brass details with a calm club atmosphere.
 
-### Selected style: Tournament editorial desk
+### Selected style: Dark competitive arena
 
-- **Design movement:** Modern sports editorial with restrained Swiss-grid discipline and tactile scorecard details.
+- **Design movement:** Competitive product UI with Chess.com-inspired dark surfaces, compact controls, and clear game-state hierarchy.
 - **Core principles:** Legibility first, decisive contrast, compact information density, and visible game state.
-- **Color philosophy:** Deep ink and warm ivory make the board feel authoritative, while a single green accent signals active play and successful outcomes.
-- **Layout paradigm:** A left rail introduces the product and account context; the game board anchors the visual center; the scorecard rail keeps statistics and actions adjacent to play instead of below it.
-- **Signature elements:** Hairline rules, numbered stat labels, and a small live-status marker that echoes tournament broadcast graphics.
-- **Interaction philosophy:** Every action reports a clear state change. Illegal moves snap back without drama, completed games create a visible result panel, and authentication errors remain close to the relevant field.
-- **Animation:** Use short 160–220ms fades and translate transitions for panels and status changes. Avoid continuous decorative animation so the board remains the focus.
-- **Typography system:** Use `DM Sans` for interface text and `Space Grotesk` for headings and numerical stats, both loaded from Google Fonts in the public page.
-- **Brand essence:** A focused chess desk for players who want a clean board and an honest record; precise, composed, competitive.
-- **Brand voice:** Headlines are direct and editorial. Example lines: “Play the position in front of you.” and “Your record, kept in view.”
-- **Wordmark and logo:** The wordmark uses a compact “C” monogram paired with a cut-out knight silhouette in the application header.
-- **Signature brand color:** `#87d36b`, a fresh match-point green used for live state, primary actions, and positive results.
+- **Color philosophy:** `#302e2c` anchors the play area, `#262522` contains global navigation, `#21201d` frames the move panel, and a warm pawn yellow carries primary actions and the brand.
+- **Layout paradigm:** A fixed left navigation rail, central square board with player clocks, and right control panel create the requested three-column play room. On mobile, the rail becomes a bottom navigation and the right panel moves below the board.
+- **Signature elements:** Yellow active states, round player avatars, digital clocks, move-number rows, and tabs for match, new game, and chat.
+- **Interaction philosophy:** Every action reports a clear state change. Illegal moves snap back, clocks follow the side to move, completed games update the record, and tabs expose focused controls without leaving the board.
+- **Animation:** Use short 160–220ms transitions for menu drawers, buttons, and active states. Avoid decorative motion so the board and clocks remain the focus.
+- **Typography system:** Use Inter with strong weights for interface text, clocks, headings, and navigation.
+- **Brand essence:** A focused chess desk for players who want a clean board and an honest record; direct, competitive, unmistakable.
+- **Brand voice:** Navigation is concise and action-led. Example labels: “Jogar” and “Nova partida”.
+- **Wordmark and logo:** The header uses the supplied golden pawn image as the brand mark beside the CHESSE wordmark and as the favicon.
+- **Signature brand color:** Warm pawn yellow `#f0b90b`, with `#ffd45b` for hover and focus feedback.
 
 ## Required behavior
 

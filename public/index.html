@@ -3,11 +3,14 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#302e2c">
     <meta name="description" content="A focused chess dashboard for playing positions and tracking your record.">
-    <title>Chesse | Play the position in front of you</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/pawn-logo.png">
+    <title>Chesse | Play chess</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard.js/1.0.0/chessboard-1.0.0.min.css">
     <link rel="stylesheet" href="/styles.css">
   </head>
@@ -15,7 +18,7 @@
     <main class="site-shell">
       <section class="auth-view" id="auth-view">
         <div class="auth-intro">
-          <div class="brand-lockup"><span class="brand-mark">C</span><span>CHESSE</span></div>
+          <div class="brand-lockup"><img src="/pawn-logo.png" alt="" class="brand-logo"><span>CHESSE</span></div>
           <p class="eyebrow">THE DAILY CHESS DESK</p>
           <h1>Play the position in front of you.</h1>
           <p class="intro-copy">A clean board, a clear record, and no noise between you and the next move.</p>
@@ -47,68 +50,84 @@
       </section>
 
       <section class="dashboard-view is-hidden" id="dashboard-view">
-        <header class="topbar">
-          <div class="brand-lockup"><span class="brand-mark">C</span><span>CHESSE</span></div>
-          <div class="topbar-meta"><span class="live-dot"></span><span>LIVE DESK</span><span class="topbar-divider"></span><span id="topbar-username">PLAYER</span></div>
-          <button class="button button-quiet" type="button" id="logout-button">Sign out</button>
-        </header>
-
-        <div class="dashboard-grid">
-          <aside class="side-rail">
-            <div class="rail-block">
-              <p class="eyebrow">PLAYER PROFILE</p>
-              <div class="profile-row">
+        <div class="app-frame">
+          <aside class="global-sidebar">
+            <div class="sidebar-brand"><img src="/pawn-logo.png" alt="Chesse pawn" class="sidebar-logo"><span>CHESSE</span></div>
+            <nav class="global-nav" aria-label="Main navigation">
+              <button class="nav-item active" type="button"><span class="nav-icon">♟</span><span>Jogar</span></button>
+              <button class="nav-item" type="button"><span class="nav-icon">♞</span><span>Problemas</span></button>
+              <button class="nav-item" type="button"><span class="nav-icon">♜</span><span>Aprender</span></button>
+              <button class="nav-item" type="button"><span class="nav-icon">◉</span><span>Assistir</span></button>
+              <button class="nav-item" type="button"><span class="nav-icon">♙</span><span>Comunidade</span></button>
+            </nav>
+            <div class="sidebar-footer">
+              <div class="sidebar-account">
                 <div class="avatar" id="profile-avatar">C</div>
-                <div>
-                  <h2 id="profile-username">Player</h2>
-                  <p class="muted">Club desk member</p>
-                </div>
+                <div class="sidebar-account-copy"><strong id="profile-username">Player</strong><span id="sidebar-rating">1200 rating</span></div>
+                <span class="sidebar-more">•••</span>
               </div>
-            </div>
-            <div class="rail-block rail-stat-block">
-              <div class="rail-label-row"><span class="eyebrow">CURRENT RATING</span><span class="rating-spark">↗</span></div>
-              <p class="rating-number" id="rating-number">1200</p>
-              <p class="muted">Classical desk rating</p>
-            </div>
-            <div class="rail-block rail-note">
-              <p class="eyebrow">PLAYING NOTE</p>
-              <p>Every move is checked before it reaches the board. Find the clean line.</p>
+              <button class="button button-sidebar" type="button" id="logout-button">Sair</button>
             </div>
           </aside>
 
-          <section class="game-area">
-            <div class="section-heading">
-              <div>
-                <p class="eyebrow">BOARD 01 / CLASSICAL</p>
-                <h1>Current position</h1>
-              </div>
-              <div class="board-status"><span class="live-dot"></span><span id="game-status">White to move</span></div>
-            </div>
-            <div class="board-layout">
-              <div class="board-frame"><div id="board" class="board"></div></div>
-              <div class="game-sidecard panel">
-                <p class="eyebrow">POSITION REPORT</p>
-                <div class="position-report">
-                  <div><span class="report-label">Turn</span><strong id="turn-report">White</strong></div>
-                  <div><span class="report-label">State</span><strong id="state-report">In play</strong></div>
-                </div>
-                <p class="game-message" id="game-message">Drag a piece to make your move.</p>
-                <button class="button button-primary button-full" type="button" id="new-game-button">New game <span aria-hidden="true">↗</span></button>
-              </div>
-            </div>
-          </section>
+          <div class="main-shell">
+            <header class="topbar">
+              <button class="mobile-menu-button" type="button" id="mobile-menu-button" aria-label="Open navigation">☰</button>
+              <div class="topbar-title"><span class="live-dot"></span><span>PARTIDA AO VIVO</span></div>
+              <div class="topbar-account"><span id="topbar-username">PLAYER</span><div class="mini-avatar" id="topbar-avatar">P</div></div>
+            </header>
 
-          <aside class="scorecard panel">
-            <div class="scorecard-heading"><p class="eyebrow">YOUR RECORD</p><span class="record-mark">♞</span></div>
-            <p class="scorecard-title">The numbers<br><em>in view.</em></p>
-            <div class="record-list">
-              <div class="record-row"><span class="record-index">01</span><span>Wins</span><strong id="wins-stat">0</strong></div>
-              <div class="record-row"><span class="record-index">02</span><span>Losses</span><strong id="losses-stat">0</strong></div>
-              <div class="record-row"><span class="record-index">03</span><span>Draws</span><strong id="draws-stat">0</strong></div>
-            </div>
-            <div class="scorecard-footer"><span class="live-dot"></span><span>Synced from player stats</span></div>
-          </aside>
+            <main class="play-page">
+              <div class="play-header">
+                <div><p class="eyebrow">JOGAR / PARTIDA CASUAL</p><h1>Partida de xadrez</h1></div>
+                <div class="match-meta"><span class="match-dot"></span><span>10 min</span><span>•</span><span>Clássico</span></div>
+              </div>
+
+              <section class="play-layout">
+                <div class="board-column">
+                  <div class="player-bar player-bar-top">
+                    <div class="player-identity"><div class="opponent-avatar">♟</div><div><strong>Oponente</strong><span>Convidado</span></div></div>
+                    <div class="clock clock-dark" id="opponent-clock">10:00</div>
+                  </div>
+                  <div class="board-frame"><div id="board" class="board"></div></div>
+                  <div class="player-bar player-bar-bottom">
+                    <div class="player-identity"><div class="avatar" id="board-avatar">C</div><div><strong id="board-username">Player</strong><span id="board-rating">1200</span></div></div>
+                    <div class="clock clock-light active" id="player-clock">10:00</div>
+                  </div>
+                  <div class="board-controls">
+                    <button class="control-button" type="button" id="flip-board-button">⇅ <span>Virar tabuleiro</span></button>
+                    <span class="board-status"><span class="live-dot"></span><span id="game-status">Brancas jogam</span></span>
+                    <button class="control-button" type="button" id="sound-button">◖ <span>Som</span></button>
+                  </div>
+                </div>
+
+                <aside class="game-panel">
+                  <div class="panel-tabs" role="tablist" aria-label="Game panel">
+                    <button class="panel-tab active" type="button" data-panel="match" role="tab">Partida</button>
+                    <button class="panel-tab" type="button" data-panel="new-game" role="tab">Nova partida</button>
+                    <button class="panel-tab" type="button" data-panel="chat" role="tab">Chat</button>
+                  </div>
+                  <div class="panel-view active" id="match-panel">
+                    <div class="panel-heading"><div><p class="eyebrow">HISTÓRICO DE LANCES</p><h2>Partida atual</h2></div><span class="panel-round" id="move-count">0</span></div>
+                    <div class="move-list" id="move-list"><p class="empty-state">Faça seu primeiro lance para começar.</p></div>
+                    <div class="panel-status"><span class="live-dot"></span><span id="panel-status-text">Aguardando as brancas</span></div>
+                  </div>
+                  <div class="panel-view" id="new-game-panel">
+                    <div class="panel-heading"><div><p class="eyebrow">CONTROLES</p><h2>Nova partida</h2></div></div>
+                    <p class="panel-copy">Comece uma nova partida casual com relógio de 10 minutos.</p>
+                    <button class="button button-primary button-full" type="button" id="new-game-from-panel">Começar nova partida <span>→</span></button>
+                  </div>
+                  <div class="panel-view" id="chat-panel">
+                    <div class="panel-heading"><div><p class="eyebrow">MENSAGENS</p><h2>Chat da partida</h2></div></div>
+                    <p class="empty-state chat-empty">O chat fica disponível quando você jogar com outra pessoa.</p>
+                  </div>
+                  <div class="game-actions"><button class="button button-primary" type="button" id="new-game-button">Jogar novamente <span>→</span></button><div class="action-row"><button class="button button-secondary" type="button" id="draw-button">Empate</button><button class="button button-secondary danger-button" type="button" id="resign-button">Desistir</button></div></div>
+                </aside>
+              </section>
+            </main>
+          </div>
         </div>
+        <nav class="bottom-nav" aria-label="Mobile navigation"><button class="active" type="button">♟<span>Jogar</span></button><button type="button">♞<span>Problemas</span></button><button type="button">♜<span>Aprender</span></button><button type="button">♙<span>Perfil</span></button></nav>
       </section>
     </main>
 

@@ -12,22 +12,34 @@ const elements = {
   profileUsername: document.querySelector('#profile-username'),
   profileAvatar: document.querySelector('#profile-avatar'),
   topbarUsername: document.querySelector('#topbar-username'),
-  ratingNumber: document.querySelector('#rating-number'),
-  winsStat: document.querySelector('#wins-stat'),
-  lossesStat: document.querySelector('#losses-stat'),
-  drawsStat: document.querySelector('#draws-stat'),
+  topbarAvatar: document.querySelector('#topbar-avatar'),
+  boardUsername: document.querySelector('#board-username'),
+  boardAvatar: document.querySelector('#board-avatar'),
+  sidebarRating: document.querySelector('#sidebar-rating'),
+  boardRating: document.querySelector('#board-rating'),
   gameStatus: document.querySelector('#game-status'),
-  turnReport: document.querySelector('#turn-report'),
-  stateReport: document.querySelector('#state-report'),
-  gameMessage: document.querySelector('#game-message'),
+  panelStatusText: document.querySelector('#panel-status-text'),
+  playerClock: document.querySelector('#player-clock'),
+  opponentClock: document.querySelector('#opponent-clock'),
+  moveList: document.querySelector('#move-list'),
+  moveCount: document.querySelector('#move-count'),
   logoutButton: document.querySelector('#logout-button'),
   newGameButton: document.querySelector('#new-game-button'),
+  newGameFromPanel: document.querySelector('#new-game-from-panel'),
+  drawButton: document.querySelector('#draw-button'),
+  resignButton: document.querySelector('#resign-button'),
+  flipBoardButton: document.querySelector('#flip-board-button'),
+  mobileMenuButton: document.querySelector('#mobile-menu-button'),
+  sidebar: document.querySelector('.global-sidebar'),
 };
 
 let authMode = 'login';
 let board = null;
 let game = null;
 let terminalSubmitted = false;
+let playerSeconds = 600;
+let opponentSeconds = 600;
+let clockInterval = null;
 
 async function api(path, options = {}) {
   const response = await fetch(path, {
@@ -53,25 +65,59 @@ function setAuthMessage(message = '', isError = true) {
   elements.authMessage.classList.toggle('is-success', Boolean(message) && !isError);
 }
 
-function setGameMessage(message, isError = false) {
-  elements.gameMessage.textContent = message;
-  elements.gameMessage.classList.toggle('is-error', isError);
+function formatClock(seconds) {
+  const minutes = Math.floor(seconds / 60).toString().padStart(2, '0');
+  const remainder = (seconds % 60).toString().padStart(2, '0');
+  return `${minutes}:${remainder}`;
+}
+
+function updateClocks() {
+  elements.playerClock.textContent = formatClock(playerSeconds);
+  elements.opponentClock.textContent = formatClock(opponentSeconds);
+  const whiteToMove = game && game.turn() === 'w';
+  elements.playerClock.classList.toggle('active', Boolean(whiteToMove));
+  elements.opponentClock.classList.toggle('active', Boolean(game && !whiteToMove));
+}
+
+function stopClock() {
+  window.clearInterval(clockInterval);
+  clockInterval = null;
+}
+
+function startClock() {
+  stopClock();
+  clockInterval = window.setInterval(() => {
+    if (!game || game.game_over() || terminalSubmitted) return;
+    if (game.turn() === 'w') {
+      playerSeconds = Math.max(0, playerSeconds - 1);
+    } else {
+      opponentSeconds = Math.max(0, opponentSeconds - 1);
+    }
+    updateClocks();
+    if (playerSeconds === 0 || opponentSeconds === 0) {
+      const result = playerSeconds === 0 ? 'loss' : 'win';
+      submitManualResult(result, result === 'win' ? 'Oponente ficou sem tempo.' : 'Seu tempo acabou.');
+    }
+  }, 1000);
 }
 
 function setStats(stats) {
-  elements.winsStat.textContent = stats.wins;
-  elements.lossesStat.textContent = stats.losses;
-  elements.drawsStat.textContent = stats.draws;
-  elements.ratingNumber.textContent = stats.current_rating;
+  const rating = Number(stats.current_rating);
+  elements.sidebarRating.textContent = `${rating} rating`;
+  elements.boardRating.textContent = rating;
 }
 
 function showDashboard(payload) {
   elements.authView.classList.add('is-hidden');
   elements.dashboardView.classList.remove('is-hidden');
   const username = payload.user.username;
+  const initial = username.charAt(0).toUpperCase();
   elements.profileUsername.textContent = username;
   elements.topbarUsername.textContent = username.toUpperCase();
-  elements.profileAvatar.textContent = username.charAt(0).toUpperCase();
+  elements.topbarAvatar.textContent = initial;
+  elements.profileAvatar.textContent = initial;
+  elements.boardUsername.textContent = username;
+  elements.boardAvatar.textContent = initial;
   setStats(payload.stats);
   startGame();
 }
@@ -91,9 +137,7 @@ function switchAuthMode(mode) {
   });
   elements.authEyebrow.textContent = isSignup ? 'JOIN THE DESK' : 'WELCOME BACK';
   elements.authTitle.textContent = isSignup ? 'Create your player desk' : 'Sign in to your desk';
-  elements.authSubtitle.textContent = isSignup
-    ? 'Start a record that stays in view.'
-    : 'Keep your board and record in one place.';
+  elements.authSubtitle.textContent = isSignup ? 'Start a record that stays in view.' : 'Keep your board and record in one place.';
   elements.authSubmit.innerHTML = `${isSignup ? 'Create account' : 'Sign in'} <span aria-hidden="true">↗</span>`;
   elements.password.autocomplete = isSignup ? 'new-password' : 'current-password';
   elements.passwordHint.textContent = isSignup ? 'Use at least 8 characters.' : 'Your password is never stored in plain text.';
@@ -105,16 +149,10 @@ async function submitAuth(event) {
   setAuthMessage('');
   elements.authSubmit.disabled = true;
   const formData = new FormData(elements.authForm);
-  const credentials = {
-    username: formData.get('username'),
-    password: formData.get('password'),
-  };
+  const credentials = { username: formData.get('username'), password: formData.get('password') };
 
   try {
-    const payload = await api(`/api/auth/${authMode === 'signup' ? 'signup' : 'login'}`, {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
+    const payload = await api(`/api/auth/${authMode === 'signup' ? 'signup' : 'login'}`, { method: 'POST', body: JSON.stringify(credentials) });
     const session = await api('/api/auth/me');
     showDashboard(session || payload);
   } catch (error) {
@@ -125,8 +163,7 @@ async function submitAuth(event) {
 }
 
 function isPlayersTurn(piece) {
-  return (game.turn() === 'w' && piece.search(/^b/) !== -1)
-    || (game.turn() === 'b' && piece.search(/^w/) !== -1);
+  return (game.turn() === 'w' && piece.search(/^b/) !== -1) || (game.turn() === 'b' && piece.search(/^w/) !== -1);
 }
 
 function onDragStart(source, piece) {
@@ -134,17 +171,10 @@ function onDragStart(source, piece) {
 }
 
 function onDrop(source, target) {
-  const move = game.move({
-    from: source,
-    to: target,
-    promotion: 'q',
-  });
-
-  if (move === null) {
-    return 'snapback';
-  }
-
+  const move = game.move({ from: source, to: target, promotion: 'q' });
+  if (move === null) return 'snapback';
   board.position(game.fen());
+  renderMoves();
   updateGameStatus();
   return undefined;
 }
@@ -153,66 +183,78 @@ function onSnapEnd() {
   board.position(game.fen());
 }
 
+function renderMoves() {
+  const history = game.history();
+  elements.moveCount.textContent = Math.ceil(history.length / 2);
+  if (!history.length) {
+    elements.moveList.innerHTML = '<p class="empty-state">Faça seu primeiro lance para começar.</p>';
+    return;
+  }
+  elements.moveList.innerHTML = '';
+  for (let index = 0; index < history.length; index += 2) {
+    const row = document.createElement('div');
+    row.className = 'move-row';
+    row.innerHTML = `<span class="move-number">${(index / 2) + 1}.</span><span class="move-san">${history[index] || '—'}</span><span class="move-san">${history[index + 1] || '—'}</span>`;
+    elements.moveList.appendChild(row);
+  }
+  elements.moveList.scrollTop = elements.moveList.scrollHeight;
+}
+
 function getTerminalState() {
   if (game.in_checkmate()) {
     const winner = game.turn() === 'w' ? 'Black' : 'White';
-    return {
-      result: winner === 'White' ? 'win' : 'loss',
-      status: `${winner} wins by checkmate`,
-      state: 'Checkmate',
-    };
+    return { result: winner === 'White' ? 'win' : 'loss', status: `${winner} vence por xeque-mate`, state: 'Xeque-mate' };
   }
-
   if (game.in_draw()) {
-    let reason = 'Draw';
-    if (game.in_stalemate()) reason = 'Stalemate';
-    if (game.in_threefold_repetition()) reason = 'Threefold repetition';
-    if (game.insufficient_material()) reason = 'Insufficient material';
-    if (game.isDrawByFiftyMoves && game.isDrawByFiftyMoves()) reason = 'Fifty-move rule';
-    return { result: 'draw', status: `${reason} declared`, state: 'Draw' };
+    let reason = 'Empate';
+    if (game.in_stalemate()) reason = 'Afogamento';
+    if (game.in_threefold_repetition()) reason = 'Repetição tripla';
+    if (game.insufficient_material()) reason = 'Material insuficiente';
+    if (game.isDrawByFiftyMoves && game.isDrawByFiftyMoves()) reason = 'Regra dos 50 lances';
+    return { result: 'draw', status: `${reason} declarado`, state: 'Empate' };
   }
-
   return null;
 }
 
-async function submitGameResult(terminal) {
+async function submitManualResult(result, message) {
   if (terminalSubmitted) return;
   terminalSubmitted = true;
+  stopClock();
+  elements.gameStatus.textContent = message;
+  elements.panelStatusText.textContent = 'Salvando resultado...';
   try {
-    const payload = await api('/api/games/result', {
-      method: 'POST',
-      body: JSON.stringify({ result: terminal.result }),
-    });
+    const payload = await api('/api/games/result', { method: 'POST', body: JSON.stringify({ result }) });
     setStats(payload.stats);
-    setGameMessage(`${terminal.status}. Your record is updated.`);
+    elements.panelStatusText.textContent = 'Resultado salvo no seu perfil';
   } catch (error) {
     terminalSubmitted = false;
-    setGameMessage(error.message, true);
+    elements.panelStatusText.textContent = error.message;
   }
 }
 
 function updateGameStatus() {
   const terminal = getTerminalState();
-
   if (terminal) {
+    stopClock();
     elements.gameStatus.textContent = terminal.status;
-    elements.turnReport.textContent = game.turn() === 'w' ? 'White' : 'Black';
-    elements.stateReport.textContent = terminal.state;
-    setGameMessage(`${terminal.status}. Saving the result...`);
-    submitGameResult(terminal);
+    elements.panelStatusText.textContent = `${terminal.state} • Salvando resultado...`;
+    submitManualResult(terminal.result, terminal.status);
+    updateClocks();
     return;
   }
-
-  const turn = game.turn() === 'w' ? 'White' : 'Black';
-  elements.gameStatus.textContent = `${turn} to move`;
-  elements.turnReport.textContent = turn;
-  elements.stateReport.textContent = game.in_check() ? 'Check' : 'In play';
-  setGameMessage(game.in_check() ? `${turn} is in check.` : 'Drag a piece to make your move.');
+  const turn = game.turn() === 'w' ? 'Brancas' : 'Pretas';
+  const inCheck = game.in_check();
+  elements.gameStatus.textContent = inCheck ? `${turn} em xeque` : `${turn} jogam`;
+  elements.panelStatusText.textContent = inCheck ? `${turn} precisam responder ao xeque` : `Aguardando as ${turn.toLowerCase()}`;
+  updateClocks();
 }
 
 function startGame() {
+  stopClock();
   game = new Chess();
   terminalSubmitted = false;
+  playerSeconds = 600;
+  opponentSeconds = 600;
   if (board) board.destroy();
   board = Chessboard('board', {
     draggable: true,
@@ -222,13 +264,21 @@ function startGame() {
     onDrop,
     onSnapEnd,
   });
+  renderMoves();
   updateGameStatus();
+  startClock();
+}
+
+function setPanel(panelName) {
+  document.querySelectorAll('.panel-tab').forEach((tab) => tab.classList.toggle('active', tab.dataset.panel === panelName));
+  document.querySelectorAll('.panel-view').forEach((panel) => panel.classList.toggle('active', panel.id === `${panelName}-panel`));
 }
 
 async function logout() {
   try {
     await api('/api/auth/logout', { method: 'POST' });
   } finally {
+    stopClock();
     if (board) board.destroy();
     board = null;
     game = null;
@@ -247,10 +297,19 @@ async function bootstrap() {
   }
 }
 
-document.querySelectorAll('.tab-button').forEach((button) => {
-  button.addEventListener('click', () => switchAuthMode(button.dataset.mode));
-});
+document.querySelectorAll('.tab-button').forEach((button) => button.addEventListener('click', () => switchAuthMode(button.dataset.mode)));
+document.querySelectorAll('.panel-tab').forEach((button) => button.addEventListener('click', () => setPanel(button.dataset.panel)));
+document.querySelectorAll('.nav-item, .bottom-nav button').forEach((button) => button.addEventListener('click', () => {
+  document.querySelectorAll('.nav-item, .bottom-nav button').forEach((item) => item.classList.remove('active'));
+  button.classList.add('active');
+  elements.sidebar.classList.remove('open');
+}));
 elements.authForm.addEventListener('submit', submitAuth);
 elements.logoutButton.addEventListener('click', logout);
 elements.newGameButton.addEventListener('click', startGame);
+elements.newGameFromPanel.addEventListener('click', () => { startGame(); setPanel('match'); });
+elements.drawButton.addEventListener('click', () => submitManualResult('draw', 'Empate oferecido'));
+elements.resignButton.addEventListener('click', () => submitManualResult('loss', 'Você desistiu da partida'));
+elements.flipBoardButton.addEventListener('click', () => board && board.flip());
+elements.mobileMenuButton.addEventListener('click', () => elements.sidebar.classList.toggle('open'));
 bootstrap();
