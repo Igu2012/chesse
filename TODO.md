@@ -40,6 +40,6 @@
 
 ## 7. Publish the source repository
 
-- [ ] Push the accepted project to a public GitHub repository named `chesse` after the owner confirms the GitHub target.
+- [x] Push the accepted project to a public GitHub repository named `chesse` after the owner confirms the GitHub target.
 - [x] Do not commit `.env`, `.env.*`, credentials, or other runtime secrets.
 - [x] Provide an easy English deployment README for Render.
