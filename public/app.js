@@ -694,11 +694,28 @@ function profileSectionMarkup(profile, history) {
   const options = (name, title, values) => `<fieldset class="customizer-group"><legend>${title}</legend><div class="customizer-options">${values.map(([value, label, icon]) => `<button type="button" class="customizer-option ${rat[name] === value ? 'selected' : ''}" data-rat-choice="${name}" data-rat-value="${value}"><span class="option-art option-${value}">${icon || ''}</span><small>${label}</small></button>`).join('')}</div></fieldset>`;
   const customizer = `<div class="customizer-tabs" role="tablist">${groups.map(([name, label, icon]) => `<button type="button" class="customizer-tab ${customizerCategory === name ? 'active' : ''}" data-customizer-tab="${name}" role="tab"><span>${icon}</span><small>${label}</small></button>`).join('')}</div><div class="customizer-panels">${groups.map(([name, , , title, values]) => `<div class="customizer-panel ${customizerCategory === name ? 'active' : ''}" data-customizer-panel="${name}">${options(name, title, values)}</div>`).join('')}</div>${groups.map(([name]) => `<input type="hidden" name="${name}" value="${rat[name] || 'none'}">`).join('')}`;
   return `<div class="profile-layout">
-    <div class="feature-card profile-card"><div class="profile-character">${rat.avatarMode !== 'avatar' ? `<div class="rat-full-wrap">${ratCharacterMarkup(rat, 'full')}</div>` : ''}<div><span class="feature-kicker">${t('profile')}</span><h2>${escapeHtml(profile.displayName)}</h2><p>${escapeHtml(profile.bio || 'Your chess story starts here.')}</p></div></div>
-      <form id="profile-form" class="profile-form"><label>${t('displayName')}<input name="displayName" maxlength="40" value="${escapeHtml(profile.displayName)}"></label><label>${t('bio')}<textarea name="bio" maxlength="280" rows="3">${escapeHtml(profile.bio)}</textarea></label><div class="form-grid"><label>${t('ratColor')}<select name="ratColor"><option value="gold">${t('gold')}</option><option value="brown">${t('brown')}</option><option value="gray">${t('gray')}</option><option value="pink">${t('pink')}</option><option value="blue">${t('blue')}</option></select></label><label>${t('avatarMode')}<select name="ratAvatarMode"><option value="avatar">${t('avatar')}</option><option value="full">${t('full')}</option><option value="both">${t('both')}</option></select></label></div><div class="customizer"><div class="customizer-title"><span class="feature-kicker">CHARACTER STUDIO</span><strong>Build your rat</strong><small>Mix pieces to make your own chess desk mascot.</small></div>${customizer}</div><button class="button button-primary" type="submit">${t('save')} <span>↗</span></button><p class="form-message" id="profile-message" role="status"></p></form>
+    <div class="feature-card profile-card"><div class="profile-character" id="profile-rat-preview">${rat.avatarMode !== 'avatar' ? `<div class="rat-full-wrap">${ratCharacterMarkup(rat, 'full')}</div>` : ''}<div><span class="feature-kicker">${t('profile')}</span><h2>${escapeHtml(profile.displayName)}</h2><p>${escapeHtml(profile.bio || 'Your chess story starts here.')}</p></div></div>
+      <form id="profile-form" class="profile-form"><label>${t('displayName')}<input name="displayName" maxlength="40" value="${escapeHtml(profile.displayName)}"></label><label>${t('bio')}<textarea name="bio" maxlength="280" rows="3">${escapeHtml(profile.bio)}</textarea></label><div class="form-grid"><label>${t('ratColor')}<select name="ratColor"><option value="gold">${t('gold')}</option><option value="brown">${t('brown')}</option><option value="gray">${t('gray')}</option><option value="pink">${t('pink')}</option><option value="blue">${t('blue')}</option></select></label><label>${t('avatarMode')}<select name="ratAvatarMode"><option value="avatar">${t('avatar')}</option><option value="full">${t('full')}</option><option value="both">${t('both')}</option></select></label></div><button type="button" class="customize-launch" id="open-customizer"><span class="customize-launch-icon">✦</span><span><strong>Customize your rat</strong><small>Open the character studio</small></span><b>→</b></button><div class="customizer-modal" id="customizer-modal" aria-hidden="true"><div class="customizer-modal-backdrop" data-close-customizer></div><div class="customizer-dialog" role="dialog" aria-modal="true" aria-labelledby="customizer-title"><div class="customizer-dialog-header"><div><span class="feature-kicker">CHARACTER STUDIO</span><h2 id="customizer-title">Build your rat</h2><p>See every change instantly.</p></div><button type="button" class="customizer-close" data-close-customizer aria-label="Close">×</button></div><div class="customizer-live-preview" id="customizer-live-preview">${ratCharacterMarkup(rat, 'full')}</div><div class="customizer">${customizer}</div><button type="button" class="button button-primary customizer-done" data-close-customizer>Done</button></div></div><button class="button button-primary" type="submit">${t('save')} <span>↗</span></button><p class="form-message" id="profile-message" role="status"></p></form>
     </div>
     <div class="feature-card history-card"><div class="panel-heading"><div><span class="feature-kicker">${t('history')}</span><h2>${t('history')}</h2></div></div><div class="history-list">${historyMarkup}</div><div id="history-detail"></div></div>
   </div>`;
+}
+
+function readRatForm(form) {
+  return {
+    color: form.elements.ratColor.value, avatarMode: form.elements.ratAvatarMode.value,
+    accessory: form.elements.accessory.value, background: form.elements.background.value,
+    hat: form.elements.hat.value, hair: form.elements.hair.value, shirt: form.elements.shirt.value,
+    pants: form.elements.pants.value, beard: form.elements.beard.value,
+  };
+}
+
+function updateRatPreview(form) {
+  const rat = readRatForm(form);
+  const livePreview = form.querySelector('#customizer-live-preview');
+  if (livePreview) livePreview.innerHTML = ratCharacterMarkup(rat, 'full');
+  const profilePreview = form.closest('.profile-card')?.querySelector('#profile-rat-preview .rat-full-wrap');
+  if (profilePreview && rat.avatarMode !== 'avatar') profilePreview.innerHTML = ratCharacterMarkup(rat, 'full');
 }
 
 async function renderCommunitySection() {
@@ -712,6 +729,18 @@ async function renderCommunitySection() {
     const colorSelect = form.elements.ratColor;
     colorSelect.value = profile.rat.color;
     form.elements.ratAvatarMode.value = profile.rat.avatarMode;
+    colorSelect.addEventListener('change', () => updateRatPreview(form));
+    form.elements.ratAvatarMode.addEventListener('change', () => updateRatPreview(form));
+    form.querySelector('#open-customizer')?.addEventListener('click', () => {
+      const modal = form.querySelector('#customizer-modal');
+      modal?.classList.add('open');
+      modal?.setAttribute('aria-hidden', 'false');
+    });
+    form.querySelectorAll('[data-close-customizer]').forEach((button) => button.addEventListener('click', () => {
+      const modal = form.querySelector('#customizer-modal');
+      modal?.classList.remove('open');
+      modal?.setAttribute('aria-hidden', 'true');
+    }));
     form.querySelectorAll('[data-customizer-tab]').forEach((tab) => tab.addEventListener('click', () => {
       customizerCategory = tab.dataset.customizerTab;
       form.querySelectorAll('[data-customizer-tab]').forEach((item) => item.classList.toggle('active', item === tab));
@@ -721,6 +750,7 @@ async function renderCommunitySection() {
       const group = button.dataset.ratChoice;
       form.elements[group].value = button.dataset.ratValue;
       form.querySelectorAll(`[data-rat-choice="${group}"]`).forEach((item) => item.classList.toggle('selected', item === button));
+      updateRatPreview(form);
     }));
     form.addEventListener('submit', saveProfile);
     elements.sectionContent.querySelectorAll('[data-history-game]').forEach((button) => button.addEventListener('click', () => loadHistoryDetail(button.dataset.historyGame)));

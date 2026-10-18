@@ -110,3 +110,10 @@
 - [x] The character editor uses category tabs instead of showing every customization group at once.
 - [x] Only one category panel is visible at a time, while unsaved choices remain in the form.
 - [x] Categories are grouped into background, hats, hair, shirts, pants, beards, and extras.
+
+## 18. Deliver a dedicated live character menu
+
+- [x] The profile exposes a dedicated button that opens the rat character studio as a separate menu.
+- [x] The menu contains its own live character preview above the customization categories.
+- [x] Changing any color, clothing, hair, beard, hat, or accessory updates the preview immediately before save.
+- [x] The menu can be closed without submitting the profile, and changes remain available until the user saves or leaves the page.
