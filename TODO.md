@@ -104,3 +104,9 @@
 - [x] Provide selectable shirts including a Palmeiras-inspired green-and-white shirt, gold tee, hoodie, checker shirt, and tuxedo.
 - [x] Provide selectable pants, beards, glasses, earrings, and headphones.
 - [x] Persist all character layers in Neon and render them on the profile and compact avatar.
+
+## 17. Separate character studio categories
+
+- [x] The character editor uses category tabs instead of showing every customization group at once.
+- [x] Only one category panel is visible at a time, while unsaved choices remain in the form.
+- [x] Categories are grouped into background, hats, hair, shirts, pants, beards, and extras.

@@ -22,6 +22,7 @@ Chesse is a compact web chess dashboard inspired by modern online chess platform
 - Automatic language detection with English, Portuguese, Spanish, French, and German translations plus a language override.
 - Original transparent chubby rat mascot SVG assets for profiles and avatars.
 - Duolingo-inspired character studio with layered backgrounds, hats, hair, shirts, pants, beards, glasses, earrings, and headphones.
+- The character studio shows one customization category at a time through focused tabs, avoiding a crowded all-options panel.
 - Render Blueprint and production Dockerfile.
 - No environment files or credentials are committed.
 
