@@ -95,6 +95,7 @@ const ratItemAssets = {
   sweater: '/manus-storage/async-images/j0sSSxoqDcMpQlQGRbBvYa/image-3.webp',
   dress: '/manus-storage/async-images/j0sSSxoqDcMpQlQGRbBvYa/image-4.webp',
   bow: '/manus-storage/async-images/j0sSSxoqDcMpQlQGRbBvYa/image-5.webp',
+  'flower-clip': '/assets/rat/items/flower-clip.svg',
 };
 
 const translations = {
@@ -180,7 +181,7 @@ function ratCharacterMarkup(rat = {}, mode = 'full') {
     hair: rat.hair || 'none', shirt: rat.shirt || 'none', pants: rat.pants || 'none',
     beard: rat.beard || 'none', accessory: rat.accessory || 'none',
   };
-  const item = (name, value, extraClass = '') => (name === 'shirt' || name === 'pants') ? '' : (ratItemAssets[value] ? `<img class="rat-layer rat-image-layer rat-image-${name} rat-image-item-${value} ${extraClass}" src="${ratItemAssets[value]}" alt="" aria-hidden="true">` : '');
+  const item = (name, value, extraClass = '') => (name === 'shirt' || name === 'pants') ? '' : (ratItemAssets[value] ? `<img class="rat-layer rat-image-layer rat-image-${name} rat-image-item-${value} ${extraClass}" src="${ratItemAssets[value]}" alt="" aria-hidden="true" onerror="this.remove()">` : '');
   return `<span class="rat-stage rat-stage-${mode} rat-bg-${safe.background} rat-fur-${safe.color}">
     <img src="${mode === 'avatar' ? ratAssets.avatar : ratAssets.full}" alt="Chesse rat character" class="rat-base">
     ${item('shirt', safe.shirt)}${item('pants', safe.pants)}${item('hair', safe.hair)}${item('hat', safe.hat)}${item('beard', safe.beard)}${item('accessory', safe.accessory)}
@@ -727,10 +728,16 @@ document.addEventListener('keydown', (event) => {
     elements.sidebarMoreButton?.setAttribute('aria-expanded', 'false');
   }
 });
+document.addEventListener('dragstart', (event) => {
+  if (event.target instanceof HTMLImageElement) event.preventDefault();
+});
+document.addEventListener('contextmenu', (event) => {
+  if (event.target instanceof HTMLImageElement) event.preventDefault();
+});
 bootstrap();
 
 
-function profileSectionMarkup(profile, history) {
+function profileSectionMarkup(profile, history, stats = {}) {
   const rat = { color: 'gold', accessory: 'none', avatarMode: 'both', background: 'night', hat: 'none', hair: 'none', shirt: 'none', pants: 'none', beard: 'none', ...(profile.rat || {}) };
   if (rat.accessory === 'pawn') rat.accessory = 'none';
   const historyMarkup = history.length ? history.map((game) => `<button class="history-row" type="button" data-history-game="${game.id}"><span><strong>${escapeHtml(game.opponentDisplayName)}</strong><small>${escapeHtml(game.opponentUsername)} · ${game.moveCount} moves</small></span><b class="history-${game.outcome}">${t(game.outcome)}</b><time>${new Date(game.completedAt).toLocaleDateString()}</time></button>`).join('') : `<p class="empty-state">${t('noHistory')}</p>`;
@@ -741,12 +748,13 @@ function profileSectionMarkup(profile, history) {
     ['shirt', 'Shirts', '◇', 'Shirts', [['none','No shirt',''],['gold','Gold tee',''],['palmeiras','Palmeiras','P'],['hoodie','Hoodie',''],['checker','Checker',''],['tuxedo','Tuxedo',''],['sweater','Sweater',''],['dress','Dress','']]],
     ['pants', 'Pants', '▥', 'Pants', [['none','Natural',''],['denim','Denim',''],['black','Black',''],['shorts','Shorts',''],['track','Track pants','']]],
     ['beard', 'Beards', '⌣', 'Beards', [['none','Clean',''],['goatee','Goatee',''],['mustache','Mustache',''],['full','Full beard',''],['royal','Royal beard','']]],
-    ['accessory', 'Extras', '✦', 'Extras', [['none','None',''],['glasses','Glasses','◉'],['star-earring','Star earring','✦'],['headphones','Headphones','◒'],['bow','Bow','']]],
+    ['accessory', 'Extras', '✦', 'Extras', [['none','None',''],['glasses','Glasses','◉'],['star-earring','Star earring','✦'],['headphones','Headphones','◒'],['bow','Bow',''],['flower-clip','Flower clip','']]],
   ];
-  const options = (name, title, values) => `<fieldset class="customizer-group"><legend>${title}</legend><div class="customizer-options">${values.map(([value, label, icon]) => `<button type="button" class="customizer-option ${rat[name] === value ? 'selected' : ''}" data-rat-choice="${name}" data-rat-value="${value}" aria-label="${label}" title="${label}"><span class="option-art option-${value}">${ratItemAssets[value] ? `<img src="${ratItemAssets[value]}" alt="" aria-hidden="true">` : icon || ''}</span></button>`).join('')}</div></fieldset>`;
+  const options = (name, title, values) => `<fieldset class="customizer-group"><legend>${title}</legend><div class="customizer-options">${values.map(([value, label, icon]) => `<button type="button" class="customizer-option ${rat[name] === value ? 'selected' : ''}" data-rat-choice="${name}" data-rat-value="${value}" aria-label="${label}" title="${label}"><span class="option-art option-${value}">${ratItemAssets[value] ? `<img src="${ratItemAssets[value]}" alt="" aria-hidden="true" onerror="this.remove()">` : icon || ''}</span></button>`).join('')}</div></fieldset>`;
   const customizer = `<div class="customizer-tabs" role="tablist">${groups.map(([name, label, icon]) => `<button type="button" class="customizer-tab ${customizerCategory === name ? 'active' : ''}" data-customizer-tab="${name}" role="tab"><span>${icon}</span><small>${label}</small></button>`).join('')}</div><div class="customizer-panels">${groups.map(([name, , , title, values]) => `<div class="customizer-panel ${customizerCategory === name ? 'active' : ''}" data-customizer-panel="${name}">${options(name, title, values)}</div>`).join('')}</div>${groups.map(([name]) => `<input type="hidden" name="${name}" value="${rat[name] || 'none'}">`).join('')}`;
+  const statsMarkup = `<div class="profile-stats" aria-label="Game results"><div><strong>${Number(stats.wins || 0)}</strong><small>${t('win')}</small></div><div><strong>${Number(stats.losses || 0)}</strong><small>${t('loss')}</small></div><div><strong>${Number(stats.draws || 0)}</strong><small>${t('draw')}</small></div></div>`;
   return `<div class="profile-layout">
-    <div class="feature-card profile-card"><div class="profile-character" id="profile-rat-preview">${rat.avatarMode !== 'avatar' ? `<div class="rat-full-wrap">${ratCharacterMarkup(rat, 'full')}</div>` : ''}<div><span class="feature-kicker">${t('profile')}</span><h2>${escapeHtml(profile.displayName)}</h2><p>${escapeHtml(profile.bio || 'Your chess story starts here.')}</p></div></div>
+    <div class="feature-card profile-card"><div class="profile-character" id="profile-rat-preview">${rat.avatarMode !== 'avatar' ? `<div class="rat-full-wrap">${ratCharacterMarkup(rat, 'full')}</div>` : ''}<div><span class="feature-kicker">${t('profile')}</span><h2>${escapeHtml(profile.displayName)}</h2><p>${escapeHtml(profile.bio || 'Your chess story starts here.')}</p></div></div>${statsMarkup}
       <form id="profile-form" class="profile-form"><label>${t('displayName')}<input name="displayName" maxlength="40" value="${escapeHtml(profile.displayName)}"></label><label>${t('bio')}<textarea name="bio" maxlength="280" rows="3">${escapeHtml(profile.bio)}</textarea></label><div class="form-grid"><label>${t('ratColor')}<select name="ratColor"><option value="gold">${t('gold')}</option><option value="brown">${t('brown')}</option><option value="gray">${t('gray')}</option><option value="pink">${t('pink')}</option><option value="blue">${t('blue')}</option></select></label><label>${t('avatarMode')}<select name="ratAvatarMode"><option value="avatar">${t('avatar')}</option><option value="full">${t('full')}</option><option value="both">${t('both')}</option></select></label></div><button type="button" class="customize-launch" id="open-customizer"><span class="customize-launch-icon">✦</span><span><strong>Customize your rat</strong><small>Open the character studio</small></span><b>→</b></button><div class="customizer-modal" id="customizer-modal" aria-hidden="true"><div class="customizer-modal-backdrop" data-close-customizer></div><div class="customizer-dialog" role="dialog" aria-modal="true" aria-labelledby="customizer-title"><div class="customizer-dialog-header"><div><span class="feature-kicker">CHARACTER STUDIO</span><h2 id="customizer-title">Build your rat</h2><p>See every change instantly.</p></div><button type="button" class="customizer-close" data-close-customizer aria-label="Close">×</button></div><div class="customizer-live-preview" id="customizer-live-preview">${ratCharacterMarkup(rat, 'full')}</div><div class="customizer">${customizer}</div><button type="button" class="button button-primary customizer-done" data-close-customizer>Done</button></div></div><button class="button button-primary" type="submit">${t('save')} <span>↗</span></button><p class="form-message" id="profile-message" role="status"></p></form>
     </div>
     <div class="feature-card history-card"><div class="panel-heading"><div><span class="feature-kicker">${t('history')}</span><h2>${t('history')}</h2></div></div><div class="history-list">${historyMarkup}</div><div id="history-detail"></div></div>
@@ -773,10 +781,10 @@ function updateRatPreview(form) {
 async function renderCommunitySection() {
   elements.sectionContent.innerHTML = `<p class="loading-state">${t('loading')}</p>`;
   try {
-    const [profilePayload, historyPayload] = await Promise.all([api('/api/profile'), api('/api/profile/history')]);
+    const [profilePayload, historyPayload, sessionPayload] = await Promise.all([api('/api/profile'), api('/api/profile/history'), api('/api/auth/me')]);
     const profile = { ...profilePayload.profile, username: profilePayload.username };
     currentProfile = profile;
-    elements.sectionContent.innerHTML = profileSectionMarkup(profile, historyPayload.games);
+    elements.sectionContent.innerHTML = profileSectionMarkup(profile, historyPayload.games, sessionPayload.stats);
     const form = document.querySelector('#profile-form');
     const colorSelect = form.elements.ratColor;
     colorSelect.value = profile.rat.color;

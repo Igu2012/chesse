@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Coral flower hair clip">
+  <g stroke="#553b32" stroke-width="5" stroke-linejoin="round">
+    <path d="M63 111 C76 95 92 82 113 75" fill="none" stroke="#5f9a57" stroke-width="10" stroke-linecap="round"/>
+    <path d="M84 92 C71 79 58 82 52 94 C66 103 76 103 84 92Z" fill="#6eb567"/>
+    <path d="M93 77 C89 61 98 45 113 43 C119 58 113 71 93 77Z" fill="#73bd68"/>
+    <circle cx="67" cy="62" r="20" fill="#ee6f68"/>
+    <circle cx="94" cy="49" r="20" fill="#f17a72"/>
+    <circle cx="113" cy="71" r="20" fill="#e96060"/>
+    <circle cx="88" cy="84" r="20" fill="#f28a78"/>
+    <circle cx="86" cy="67" r="13" fill="#f6c94e"/>
+    <path d="M42 116 Q81 128 123 108" fill="none" stroke="#d8a33e" stroke-width="8" stroke-linecap="round"/>
+  </g>
+</svg>
